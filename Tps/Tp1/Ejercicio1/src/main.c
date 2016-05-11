@@ -58,8 +58,8 @@ typedef enum{GREEN, YELLOW, RED}state; // define the states
 //  
 state next_state;
 
-bool_t from_RED = 0;
-bool_t from_GREEN = 0;
+bool_t from_RED = FALSE;
+bool_t from_GREEN = FALSE;
 /*------------------------------------------------------------------------------
                             init_FSM()
 ------------------------------------------------------------------------------*/
@@ -80,13 +80,13 @@ state do_state_YELLOW()
    if(from_GREEN)
    {
       from_GREEN = FALSE;
-      timeout = 0;
+      timeout = FALSE;
       return RED;
    }
    if(from_RED)
    {
       from_RED = FALSE;
-      timeout = 0;
+      timeout = FALSE;
       return GREEN;
    }
 }
@@ -98,9 +98,8 @@ state do_state_GREEN()
 		digitalWrite(LED3, ON);
 	   digitalWrite(LED1, OFF);
 		digitalWrite(LED2, OFF);
-       
    }
-   timeout = 0;
+   timeout = FALSE;
    from_GREEN = TRUE;
    return YELLOW;
 }
@@ -113,7 +112,7 @@ state do_state_RED()
 		digitalWrite(LED1, ON);
 		digitalWrite(LED2, OFF);
    }
-   timeout = 0;
+   timeout = FALSE;
    from_RED = TRUE;
    return YELLOW;
 }
@@ -144,18 +143,18 @@ void update_FSM()
 
 int main(void)
 {
-
+   // initialize board configurations
    boardConfig();
 
    tickConfig(1);
 
-   digitalConfig(0, INITIALIZE );
-
+   digitalConfig(0, INITIALIZE);
+   // switchs configs
    digitalConfig(TEC1, INPUT);
    digitalConfig(TEC2, INPUT);
    digitalConfig(TEC3, INPUT);
    digitalConfig(TEC4, INPUT);
-
+   // Leds configs
    digitalConfig(LEDR, OUTPUT);
    digitalConfig(LEDG, OUTPUT);
    digitalConfig(LEDB, OUTPUT);
@@ -163,16 +162,15 @@ int main(void)
    digitalConfig(LED2, OUTPUT);
    digitalConfig(LED3, OUTPUT);
 
-
+   // delays setups
    delayConfig(&delayRED_GREEN, 5000);
    delayConfig(&delayYELLOW, 500);
    // delay for the GREEN Blinking(like a real semaphore)
    delayConfig(&delayBlink, 1000);
 
-
    // init the Finite State Machine
    init_FSM();
-   // principal loop 
+
    while(1) 
    {
       // update the Finite State Machine
