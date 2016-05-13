@@ -37,44 +37,31 @@
 
 #ifndef _MAIN_H_
 #define _MAIN_H_
-/** \brief Bare Metal example header file
- **
- ** This is a mini example of the CIAA Firmware
- **
- **/
+#include"sAPI.h"
+/*------------------------------------------------------------------------------
+                        state datatype
+------------------------------------------------------------------------------*/
+typedef enum{GREEN, YELLOW, RED}state; // define the states
 
-/** \addtogroup CIAA_Firmware CIAA Firmware
- ** @{ */
-/** \addtogroup Examples CIAA Firmware Examples
- ** @{ */
-/** \addtogroup Baremetal Bare Metal example header file
- ** @{ */
+/*------------------------------------------------------------------------------
+                        Global variables
+------------------------------------------------------------------------------*/
+// flag for timeout
+bool_t timeout;
 
-/*
- * Initials     Name
- * ---------------------------
- * ENP          Eric Pernia
- *
- */
+// delays 
+delay_t delayRED_GREEN;
+delay_t delayBlink;
+delay_t delayYELLOW;
 
-/*
- * modification history (new versions first)
- * -----------------------------------------------------------
- * 20150923   v0.0.1   First version
- */
+ 
+state next_state;
 
-/*==================[inclusions]=============================================*/
+// flags for mannage the transition of the YELLOW state
+bool_t from_RED;
+bool_t from_GREEN;
 
-/*==================[macros]=================================================*/
-
-/*==================[typedef]================================================*/
-
-/*==================[external data declaration]==============================*/
-
-/*==================[external functions declaration]=========================*/
-
-/** @} doxygen end group definition */
-/** @} doxygen end group definition */
-/** @} doxygen end group definition */
-/*==================[end of file]============================================*/
-#endif /* #ifndef _MAIN_H_ */
+/*------------------------------------------------------------------------------
+                           Configurations
+------------------------------------------------------------------------------*/
+#endif 
