@@ -89,7 +89,7 @@ state do_state_RED()
    while(!delayRead(&delayRED_GREEN))
    {
 		digitalWrite(LED3, OFF);
-		digitalWrite(LED1, ON);
+      digitalWrite(LED1, ON); 
 		digitalWrite(LED2, OFF);
    }
    timeout = FALSE;
