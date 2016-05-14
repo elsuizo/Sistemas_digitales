@@ -32,6 +32,7 @@ You should have received a copy of the GNU General Public License
 #include "Semaphore.h"
 
 
+
 // TODO(elsuizo:tratar de hacer que el led verde titile 2 seg antes de pasar a amarillo)-->Thu 05 May 2016 05:20:02 PM ART
 
 int main(void)
