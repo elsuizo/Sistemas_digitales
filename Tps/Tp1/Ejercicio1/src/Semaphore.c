@@ -46,77 +46,63 @@ You should have received a copy of the GNU General Public License
 void init_FSM()
 {
    next_state = RED;
-} 
+}
 
-state do_state_YELLOW()
+void do_state_YELLOW()
 {
    while(!delayRead(&delayYELLOW))
    {
-		digitalWrite(LED3, OFF);
-		digitalWrite(LED1, OFF);
-		digitalWrite(LED2, ON);
+      digitalWrite(LED3, OFF);
+      digitalWrite(LED1, OFF);
+      digitalWrite(LED2, ON);
 
    }
    if(from_GREEN)
    {
       from_GREEN = FALSE;
       timeout = FALSE;
-      return RED;
+      next_state = RED;
    }
    if(from_RED)
    {
       from_RED = FALSE;
       timeout = FALSE;
-      return GREEN;
+      next_state = GREEN;
    }
 }
 
-state do_state_GREEN()
+void do_state_GREEN()
 {
    while(!delayRead(&delayRED_GREEN))
    {
-		digitalWrite(LED3, ON);
-	   digitalWrite(LED1, OFF);
-		digitalWrite(LED2, OFF);
+      digitalWrite(LED3, ON);
+      digitalWrite(LED1, OFF);
+      digitalWrite(LED2, OFF);
    }
    timeout = FALSE;
    from_GREEN = TRUE;
-   return YELLOW;
+   next_state = YELLOW;
 }
 
-state do_state_RED()
+void do_state_RED()
 {
    while(!delayRead(&delayRED_GREEN))
    {
-		digitalWrite(LED3, OFF);
-		digitalWrite(LED1, ON);
-		digitalWrite(LED2, OFF);
+      digitalWrite(LED3, OFF);
+      digitalWrite(LED1, ON);
+      digitalWrite(LED2, OFF);
    }
    timeout = FALSE;
    from_RED = TRUE;
-   return YELLOW;
+   next_state = YELLOW;
 }
 
+void (*MEF[])(void) = {do_state_GREEN, do_state_YELLOW, do_state_RED};
 
 /*------------------------------------------------------------------------------
                            update_FSM()
 /------------------------------------------------------------------------------*/
 void update_FSM()
 {
-   switch(next_state)
-   {
-
-      case YELLOW:
-         next_state = do_state_YELLOW();
-         break;
-
-      case GREEN:
-         next_state = do_state_GREEN();
-         break;
-
-      case RED:
-         next_state = do_state_RED();
-         break;
-
-   }
+   (*MEF[next_state])();
 }
