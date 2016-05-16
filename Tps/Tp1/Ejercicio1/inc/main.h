@@ -49,12 +49,12 @@ typedef enum{GREEN, YELLOW, RED}state; // define the states
 // flag for timeout
 bool_t timeout;
 
-// delays 
+// delays
 delay_t delayRED_GREEN;
 delay_t delayBlink;
 delay_t delayYELLOW;
 
- 
+
 state next_state;
 
 // flags for mannage the transition of the YELLOW state
@@ -64,4 +64,4 @@ bool_t from_GREEN;
 /*------------------------------------------------------------------------------
                            Configurations
 ------------------------------------------------------------------------------*/
-#endif 
+#endif

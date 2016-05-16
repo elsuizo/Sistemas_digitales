@@ -46,15 +46,15 @@ You should have received a copy of the GNU General Public License
 void init_FSM()
 {
    next_state = RED;
-} 
+}
 
 state do_state_YELLOW()
 {
    while(!delayRead(&delayYELLOW))
    {
-		digitalWrite(LED3, OFF);
-		digitalWrite(LED1, OFF);
-		digitalWrite(LED2, ON);
+      digitalWrite(LED3, OFF);
+      digitalWrite(LED1, OFF);
+      digitalWrite(LED2, ON);
 
    }
    if(from_GREEN)
@@ -75,9 +75,9 @@ state do_state_GREEN()
 {
    while(!delayRead(&delayRED_GREEN))
    {
-		digitalWrite(LED3, ON);
-	   digitalWrite(LED1, OFF);
-		digitalWrite(LED2, OFF);
+      digitalWrite(LED3, ON);
+      digitalWrite(LED1, OFF);
+      digitalWrite(LED2, OFF);
    }
    timeout = FALSE;
    from_GREEN = TRUE;
@@ -88,9 +88,9 @@ state do_state_RED()
 {
    while(!delayRead(&delayRED_GREEN))
    {
-		digitalWrite(LED3, OFF);
-		digitalWrite(LED1, ON);
-		digitalWrite(LED2, OFF);
+      digitalWrite(LED3, OFF);
+      digitalWrite(LED1, ON);
+      digitalWrite(LED2, OFF);
    }
    timeout = FALSE;
    from_RED = TRUE;
