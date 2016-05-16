@@ -48,7 +48,7 @@ void init_FSM()
    next_state = RED;
 }
 
-state do_state_YELLOW()
+void do_state_YELLOW()
 {
    while(!delayRead(&delayYELLOW))
    {
@@ -61,17 +61,17 @@ state do_state_YELLOW()
    {
       from_GREEN = FALSE;
       timeout = FALSE;
-      return RED;
+      next_state = RED;
    }
    if(from_RED)
    {
       from_RED = FALSE;
       timeout = FALSE;
-      return GREEN;
+      next_state = GREEN;
    }
 }
 
-state do_state_GREEN()
+void do_state_GREEN()
 {
    while(!delayRead(&delayRED_GREEN))
    {
@@ -81,10 +81,10 @@ state do_state_GREEN()
    }
    timeout = FALSE;
    from_GREEN = TRUE;
-   return YELLOW;
+   next_state = YELLOW;
 }
 
-state do_state_RED()
+void do_state_RED()
 {
    while(!delayRead(&delayRED_GREEN))
    {
@@ -94,29 +94,15 @@ state do_state_RED()
    }
    timeout = FALSE;
    from_RED = TRUE;
-   return YELLOW;
+   next_state = YELLOW;
 }
 
+void (*MEF[])(void) = {do_state_GREEN, do_state_YELLOW, do_state_RED};
 
 /*------------------------------------------------------------------------------
                            update_FSM()
 /------------------------------------------------------------------------------*/
 void update_FSM()
 {
-   switch(next_state)
-   {
-
-      case YELLOW:
-         next_state = do_state_YELLOW();
-         break;
-
-      case GREEN:
-         next_state = do_state_GREEN();
-         break;
-
-      case RED:
-         next_state = do_state_RED();
-         break;
-
-   }
+   (*MEF[next_state])();
 }

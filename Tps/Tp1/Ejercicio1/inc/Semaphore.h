@@ -35,13 +35,13 @@ void init_FSM();
 void update_FSM();
 
 // YELLOW state
-state do_state_YELLOW();
+void do_state_YELLOW();
 
 // GREEN state
-state do_state_GREEN();
+void do_state_GREEN();
 
 // RED state
-state do_state_RED();
+void do_state_RED();
 
 
 #endif
