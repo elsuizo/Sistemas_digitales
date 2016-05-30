@@ -31,5 +31,7 @@ void CLOCK_clean_terminal(void);
 void CLOCK_clean_line_screen(void);
 void CLOCK_task_init();
 void CLOCK_task_update();
-
+void CLOCK_modes_task_update();
+void CLOCK_task_set_hour_update();
+////void CLOCK_setup_hour();
 #endif

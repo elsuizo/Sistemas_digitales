@@ -34,11 +34,31 @@ extern "C" {
 // The maximum number of tasks required at any one time during the execution
 // of the program
 // MUST BE ADJUSTED FOR EACH NEW PROJECT
-#define SCHEDULER_MAX_TASKS (3)
+#define SCHEDULER_MAX_TASKS (7)
+//
+//
+//// Store in DATA area, if possible, for rapid access
+//// Total memory per task is 7 bytes
+//typedef struct
+//{
+//   // Pointer to the task (must be a 'void (void)' function)
+//   void (* pTask)(void);
+//   // Delay (ticks) until the function will (next) be run
+//   // - see SCHEDULER_Add_Task() for further details
+//   int Delay;
+//   // Interval (ticks) between subsequent runs.
+//   // - see SCHEDULER_Add_Task() for further details
+//   int Period;
+//   // Incremented (by scheduler) when task is due to execute
+//   int RunMe;
+//} sTask;
 
 
+typedef enum {ENTER, NORMAL, ALLWAYS} system_mode;
 // Store in DATA area, if possible, for rapid access
 // Total memory per task is 7 bytes
+system_mode modes_flag;
+
 typedef struct
 {
    // Pointer to the task (must be a 'void (void)' function)
@@ -51,11 +71,14 @@ typedef struct
    int Period;
    // Incremented (by scheduler) when task is due to execute
    int RunMe;
+
+   system_mode state_flag;
 } sTask;
 
 
 void SCHEDULER_dispatch_tasks(void);
-char SCHEDULER_add_task(void (*) (void), const int, const int);
+//char SCHEDULER_add_task(void (*) (void), const int, const int);
+char SCHEDULER_add_task(void (* pFunction)(void), const int DELAY, const int PERIOD, system_mode mode);
 char SCHEDULER_delete_task(const int);
 void SCHEDULER_report_status(void);
 

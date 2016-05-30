@@ -1,7 +1,7 @@
 /* -------------------------------------------------------------------------
-@file led.h
+@file system.c
 
-@date 05/25/16 23:23:35
+@date 05/27/16 19:42:29
 @author Martin Noblia
 @email martin.noblia@openmailbox.org
 
@@ -22,19 +22,34 @@ General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 ---------------------------------------------------------------------------*/
-
-#ifndef LED_H_
-#define LED_H_
 #include"main.h"
-int32_t led_state;
-int32_t led_state2;
-DigitalIOMap_t led;
-DigitalIOMap_t led2;
+#include"system.h"
+#include"scheduler.h"
+//#include"keys.h"
 
-void LED_toggle_task_init();
-void LED_toggle_task_update();
-void LED_toggle_task_init2();
-void LED_toggle_task_update2();
+uint32_t sw4_pressed;
 
-#endif
+void SYSTEM_init()
+{
+   modes_flag = ENTER;
+   //sw4_pressed = 0;
+   buttonMefInit();
+   initialize_board();
+}
+
+void SYSTEM_change_mode()
+{
+  if(modes_flag == ENTER) 
+  {
+     modes_flag = NORMAL;
+     digitalWrite(LEDG, ON);
+     digitalWrite(LEDR, OFF);
+  }
+  else
+  {
+     modes_flag = ENTER;
+     digitalWrite(LEDR, ON);
+     digitalWrite(LEDG, OFF);
+  }
+}
 

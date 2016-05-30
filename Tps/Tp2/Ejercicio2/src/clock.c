@@ -24,6 +24,16 @@ You should have received a copy of the GNU General Public License
 ---------------------------------------------------------------------------*/
 #include"clock.h"
 #include"main.h"
+#include"scheduler.h"
+#include"system.h"
+#include"keys.h"
+
+static char CHARMAP[] = "0123456789";
+static  uint8_t  hs   =  0;
+static  uint8_t  min  =  0;
+static  uint8_t  seg  =  0;
+//clock_clean_line_screen();
+uint8_t CLOCK_string[] = "\rReloj: HH:MM:SS";
 
 void CLOCK_clean_line_screen(void)
 {
@@ -54,12 +64,6 @@ void CLOCK_task_init(str)
 void CLOCK_task_update()
 {
 
-   static char CHARMAP[] = "0123456789";
-   static  uint8_t  hs   =  0;
-   static  uint8_t  min  =  0;
-   static  uint8_t  seg  =  0;
-   //CLOCK_clean_line_screen();
-   uint8_t CLOCK_string[16] = "\rReloj: HH:MM:SS";
    //CLOCK_clean_line_screen();
    if(++seg == 60)
    {
@@ -81,7 +85,14 @@ void CLOCK_task_update()
    CLOCK_string[12]  =  CHARMAP[min%10];
    CLOCK_string[14]  =  CHARMAP[seg/10];
    CLOCK_string[15]  =  CHARMAP[seg%10];
-   
    PC_LINK_write_string_to_buffer(CLOCK_string);
+   //SYSTEM_change_mode();
+   //CLOCK_task_update();
+   //buttonMefUpdate();
 }
-
+void CLOCK_task_set_hour_update()
+{
+   //CLOCK_string2[] = "\rReloj: HH:MM:SS";  
+   //PC_LINK_write_string_to_buffer(CLOCK_string2);
+   //SYSTEM_change_mode();
+}

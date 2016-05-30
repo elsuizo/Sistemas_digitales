@@ -1,7 +1,7 @@
 /* -------------------------------------------------------------------------
-@file led.h
+@file system.h
 
-@date 05/25/16 23:23:35
+@date 05/27/16 19:47:50
 @author Martin Noblia
 @email martin.noblia@openmailbox.org
 
@@ -22,19 +22,11 @@ General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 ---------------------------------------------------------------------------*/
-
-#ifndef LED_H_
-#define LED_H_
+#ifndef _SYSTEM_H_
+#define _SYSTEM_H_
 #include"main.h"
-int32_t led_state;
-int32_t led_state2;
-DigitalIOMap_t led;
-DigitalIOMap_t led2;
-
-void LED_toggle_task_init();
-void LED_toggle_task_update();
-void LED_toggle_task_init2();
-void LED_toggle_task_update2();
-
+void SYSTEM_init();
+void SYSTEM_change_mode();
+//void SYSTEM_change_mode(DigitalIOMap_t tec);
 #endif
 

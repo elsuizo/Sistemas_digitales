@@ -60,6 +60,7 @@ void PC_LINK_init(uint32_t baud_rate)
 // update the conection?
 void PC_LINK_task_update(void)
 {
+   //SYSTEM_change_mode();
    // any byte on buffer??? 
    if(TX_read_index < TX_write_index)
    {

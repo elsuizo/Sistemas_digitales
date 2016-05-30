@@ -56,20 +56,47 @@ void SCHEDULER_dispatch_task(void)
 {
    int Index;
    // Dispatches (runs) the next task (if one is ready)
-   for (Index = 0; Index < SCHEDULER_MAX_TASKS; Index++)
+   switch(modes_flag)
    {
-      if (SCH_tasks[Index].RunMe > 0)
-      {
-         (*SCH_tasks[Index].pTask)(); // Run the task
-         SCH_tasks[Index].RunMe -= 1; // Reset / reduce RunMe flag
-         // Periodic tasks will automatically run again
-         // - if this is a 'one shot' task, remove it from the array
-         if (SCH_tasks[Index].Period == 0)
+      case ENTER:
          {
-            SCHEDULER_delete_task(Index);
+            for (Index = 0; Index < SCHEDULER_MAX_TASKS; Index++)
+            {
+               if ((SCH_tasks[Index].RunMe > 0)&& (SCH_tasks[Index].state_flag == ENTER)||(SCH_tasks[Index].state_flag==ALLWAYS))
+
+               {
+                  (*SCH_tasks[Index].pTask)(); // Run the task
+                  SCH_tasks[Index].RunMe -= 1; // Reset / reduce RunMe flag
+                  // Periodic tasks will automatically run again
+                  // - if this is a 'one shot' task, remove it from the array
+                  if (SCH_tasks[Index].Period == 0)
+                  {
+                     SCHEDULER_delete_task(Index);
+                  }
+               }
+            }
+            break;
          }
-      }
+      case NORMAL:
+         {
+            for (Index = 0; Index < SCHEDULER_MAX_TASKS; Index++)
+            {
+               if ((SCH_tasks[Index].RunMe > 0)&&(SCH_tasks[Index].state_flag == NORMAL)||(SCH_tasks[Index].state_flag==ALLWAYS))
+               {
+                  (*SCH_tasks[Index].pTask)(); // Run the task
+                  SCH_tasks[Index].RunMe -= 1; // Reset / reduce RunMe flag
+                  // Periodic tasks will automatically run again
+                  // - if this is a 'one shot' task, remove it from the array
+                  if (SCH_tasks[Index].Period == 0)
+                  {
+                     SCHEDULER_delete_task(Index);
+                  }
+               }
+            }
+            break;
+         }
    }
+   
    // Report system status
    SCHEDULER_report_status();
    // The scheduler enters idle mode at this point
@@ -107,7 +134,7 @@ Task_ID = SCH_Add_Task(Do_X,300,1000);
 Causes the function Do_X() to be executed regularly, every 1000 ticks.
 Task will be first executed at T = 300 ticks, then 1300, 2300, etc.
 -*------------------------------------------------------------------*/
-char SCHEDULER_add_task(void (* pFunction)(void), const int DELAY, const int PERIOD)
+char SCHEDULER_add_task(void (* pFunction)(void), const int DELAY, const int PERIOD, system_mode mode)
 {
    int Index = 0;
    // First find a gap in the array (if there is one)
@@ -129,7 +156,8 @@ char SCHEDULER_add_task(void (* pFunction)(void), const int DELAY, const int PER
    SCH_tasks[Index].pTask = pFunction;
    SCH_tasks[Index].Delay = DELAY;
    SCH_tasks[Index].Period = PERIOD;
-   SCH_tasks[Index].RunMe = 1;
+   SCH_tasks[Index].RunMe = 0;
+   SCH_tasks[Index].state_flag = mode;
    return Index; // return position of task (to allow later deletion)
 }
 
@@ -161,6 +189,7 @@ char SCHEDULER_delete_task(const int TASK_INDEX)
    SCH_tasks[TASK_INDEX].Delay = (int)0;
    SCH_tasks[TASK_INDEX].Period = (int)0;
    SCH_tasks[TASK_INDEX].RunMe = (char)0;
+   SCH_tasks[TASK_INDEX].state_flag = (system_mode)0;
    return Return_code; // return status
 }
 

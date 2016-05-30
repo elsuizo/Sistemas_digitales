@@ -51,6 +51,8 @@ You should have received a copy of the GNU General Public License
 #include"pc_link.h"
 #include"scheduler.h"
 #include"led.h"
+#include"system.h"
+#include"keys.h"
 
 /*------------------------------------------------------------------------------
                            main 
@@ -61,20 +63,36 @@ int main()
    /*------------------------------------------------------------------------------
                               inits
    ------------------------------------------------------------------------------*/
+   SYSTEM_init();
    // tick rate
    tick_t tick = 1;
-   initialize_board();
    SCHEDULER_init();
    uint8_t message[] = "hola";
    PC_LINK_init(115200);
    CLOCK_task_init(message);
    LED_toggle_task_init();
-   // add tasks
-   SCHEDULER_add_task(PC_LINK_task_update, 0, 5); // update every 5 milliseconds
-   SCHEDULER_add_task(CLOCK_task_update, 1, 1000); // update every 1 second
-   SCHEDULER_add_task(LED_toggle_task_update, 2, 1000); // blink led every 1 second
-   // start scheduler
+   LED_toggle_task_init2();
+   /*------------------------------------------------------------------------------
+                              NORMAL tasks
+   ------------------------------------------------------------------------------*/
+   //SCHEDULER_add_task(LED_toggle_task_update, 3, 1000, NORMAL); // blink led every 1 second
+   SCHEDULER_add_task(CLOCK_task_update, 0, 1000, NORMAL); // update every 1 second
+   SCHEDULER_add_task(KEYS_button_task_update, 3, 90, ALLWAYS); // update every 5 milliseconds
+   SCHEDULER_add_task(PC_LINK_task_update, 4, 5, NORMAL); // update every 5 milliseconds
+   /*------------------------------------------------------------------------------
+                              ENTER tasks
+   ------------------------------------------------------------------------------*/
+   SCHEDULER_add_task(LED_toggle_task_update2, 7, 500, ENTER); // blink led every 1 second
+   SCHEDULER_add_task(LED_toggle_task_update, 9, 1000, ENTER); // blink led every 1 second
+   //SCHEDULER_add_task(PC_LINK_task_update, 0, 2, ENTER); // update every 5 milliseconds
+   //SCHEDULER_add_task(CLOCK_task_set_hour_update, 0, 10, ENTER); // update every 1 second
+   /*------------------------------------------------------------------------------
+                              start scheduler
+   ------------------------------------------------------------------------------*/
    SCHEDULER_start(tick);
+   /*------------------------------------------------------------------------------
+                              main loop
+   ------------------------------------------------------------------------------*/
    while(1)
    {
       // dispatch tasks
