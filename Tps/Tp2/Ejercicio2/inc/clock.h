@@ -27,12 +27,19 @@ You should have received a copy of the GNU General Public License
 #include"main.h"
 //#include"sAPI.h"
 
+uint8_t* ptr_hs; 
+uint8_t* ptr_min;
+uint8_t* ptr_seg;
 typedef enum{HH, MM, SS} display_states;
+void CLOCK_down();
+void CLOCK_up();
+void CLOCK_move_left();
 void CLOCK_clean_terminal(void);
 void CLOCK_clean_line_screen(void);
 void CLOCK_task_init();
 void CLOCK_task_update();
 void CLOCK_modes_task_update();
 void CLOCK_task_set_hour_update();
+void CLOCK_show_update();
 ////void CLOCK_setup_hour();
 #endif

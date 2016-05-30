@@ -27,7 +27,6 @@ You should have received a copy of the GNU General Public License
 #include"scheduler.h"
 #include"keys.h"
 
-uint32_t sw4_pressed;
 
 void SYSTEM_init()
 {
@@ -61,7 +60,6 @@ void SYSTEM_change_mode(DigitalIOMap_t tec)
          }
       case TEC3:
          {
-            digitalWrite(LED1, ON);
             CLOCK_down();
             break;
          }

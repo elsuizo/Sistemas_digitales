@@ -33,23 +33,6 @@ button_state_t* ptr_button_state1 = &button_state1;
 button_state_t* ptr_button_state2 = &button_state2;
 button_state_t* ptr_button_state3 = &button_state3;
 button_state_t* ptr_button_state4 = &button_state4;
-/* Variable de estado del Led */
-
-//uint8_t keys_led_state = OFF;
-///* Variable de conteo de teclas pulsadas */
-//uint8_t counter = 0;
-//
-//void ledMefInit(void){
-//   keys_led_state = OFF;
-//}
-//
-//void ledMefUpdate(void){
-//   if(keys_led_state)
-//      keys_led_state = OFF;
-//   else
-//      keys_led_state = ON;
-//   digitalWrite( LEDB, keys_led_state );
-//}
 
 void KEYS_button_task_update()   
 {
@@ -108,13 +91,3 @@ void buttonMefUpdate(DigitalIOMap_t tec, button_state_t* ptr_button_number)
       }
    }
 }
-
-
-/* Evento que se ejecuta cuando se Libera el boton */
-//void buttonReleased(void){
-//   /* Hacer algo al liberar el boton */
-//   ledMefUpdate();
-//}
-
-	
-
