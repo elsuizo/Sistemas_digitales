@@ -27,6 +27,7 @@ You should have received a copy of the GNU General Public License
 #include"main.h"
 //#include"sAPI.h"
 
+typedef enum{HH, MM, SS} display_states;
 void CLOCK_clean_terminal(void);
 void CLOCK_clean_line_screen(void);
 void CLOCK_task_init();

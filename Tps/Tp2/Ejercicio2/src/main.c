@@ -77,15 +77,18 @@ int main()
    ------------------------------------------------------------------------------*/
    //SCHEDULER_add_task(LED_toggle_task_update, 3, 1000, NORMAL); // blink led every 1 second
    SCHEDULER_add_task(CLOCK_task_update, 0, 1000, NORMAL); // update every 1 second
-   SCHEDULER_add_task(KEYS_button_task_update, 3, 50, ALLWAYS); // update every 5 milliseconds
-   SCHEDULER_add_task(PC_LINK_task_update, 4, 5, NORMAL); // update every 5 milliseconds
+   SCHEDULER_add_task(LED_toggle_task_update, 9, 1000, NORMAL); // blink led every 1 second
+   /*------------------------------------------------------------------------------
+                              ALLWAYS tasks
+   ------------------------------------------------------------------------------*/
+   SCHEDULER_add_task(PC_LINK_task_update, 4, 5, ALLWAYS); // update every 5 milliseconds
+   SCHEDULER_add_task(KEYS_button_task_update, 3, 100, ALLWAYS); // update every 5 milliseconds
    /*------------------------------------------------------------------------------
                               ENTER tasks
    ------------------------------------------------------------------------------*/
    //SCHEDULER_add_task(LED_toggle_task_update2, 7, 500, ENTER); // blink led every 1 second
-   SCHEDULER_add_task(LED_toggle_task_update, 9, 1000, ENTER); // blink led every 1 second
    //SCHEDULER_add_task(PC_LINK_task_update, 0, 2, ENTER); // update every 5 milliseconds
-   //SCHEDULER_add_task(CLOCK_task_set_hour_update, 0, 10, ENTER); // update every 1 second
+   SCHEDULER_add_task(CLOCK_task_set_hour_update, 0, 10, ENTER); // update every 1 second
    /*------------------------------------------------------------------------------
                               start scheduler
    ------------------------------------------------------------------------------*/

@@ -86,13 +86,11 @@ void CLOCK_task_update()
    CLOCK_string[14]  =  CHARMAP[seg/10];
    CLOCK_string[15]  =  CHARMAP[seg%10];
    PC_LINK_write_string_to_buffer(CLOCK_string);
-   //SYSTEM_change_mode();
-   //CLOCK_task_update();
-   //buttonMefUpdate();
 }
 void CLOCK_task_set_hour_update()
 {
-   //CLOCK_string2[] = "\rReloj: HH:MM:SS";  
+   //uint8_t CLOCK_string2[] = "\rReloj: HH:MM:SS";  
    //PC_LINK_write_string_to_buffer(CLOCK_string2);
    //SYSTEM_change_mode();
+   PC_LINK_write_string_to_buffer(CLOCK_string);
 }

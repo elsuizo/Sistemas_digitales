@@ -29,10 +29,10 @@ You should have received a copy of the GNU General Public License
 #include"system.h"
 //button_state_t button_state = BUTTON_UP;
 
-button_state_t button_state1 = BUTTON_UP;
-button_state_t button_state2 = BUTTON_UP;
-button_state_t button_state3 = BUTTON_UP;
-button_state_t button_state4 = BUTTON_UP;
+button_state_t* ptr_button_state1 = &button_state1;
+button_state_t* ptr_button_state2 = &button_state2;
+button_state_t* ptr_button_state3 = &button_state3;
+button_state_t* ptr_button_state4 = &button_state4;
 /* Variable de estado del Led */
 
 //uint8_t keys_led_state = OFF;
@@ -53,9 +53,10 @@ button_state_t button_state4 = BUTTON_UP;
 
 void KEYS_button_task_update()   
 {
-   //buttonPressed();
-   buttonMefUpdate(TEC4, button_state4);
-   //buttonMefUpdate(TEC4);
+   buttonMefUpdate(TEC4, ptr_button_state4);
+   buttonMefUpdate(TEC3, ptr_button_state3);
+   buttonMefUpdate(TEC2, ptr_button_state2);
+   buttonMefUpdate(TEC1, ptr_button_state1);
 }
 /* Evento que se ejecuta cuando se Presiona el boton */
 void buttonPressed(DigitalIOMap_t tec)
@@ -70,43 +71,40 @@ void buttonMefInit(button_state_t button_number)
    button_number = BUTTON_UP;
 }
 
-void buttonMefUpdate(DigitalIOMap_t tec, button_state_t button_number)
+void buttonMefUpdate(DigitalIOMap_t tec, button_state_t* ptr_button_number)
 {
-   switch(button_number){
+   switch(*ptr_button_number){
       case BUTTON_UP:{
          if(!digitalRead(tec))
-            button_number = BUTTON_FALLING;
+            *ptr_button_number = BUTTON_FALLING;
          break;
       }
       case BUTTON_FALLING:{
          delay(DEBOUNCE_DELAY);
          if(!digitalRead(tec)){
-            button_number = BUTTON_DOWN;
+            *ptr_button_number = BUTTON_DOWN;
             /* Dispara el evento */
             buttonPressed(tec);
          }
          else
-            button_number = BUTTON_UP;
+            *ptr_button_number = BUTTON_UP;
          break;
       }
       case BUTTON_DOWN:{
          if(digitalRead(tec))
-            button_number = BUTTON_RISING;
+            *ptr_button_number = BUTTON_RISING;
          break;
       }
       case BUTTON_RISING:{
          delay(DEBOUNCE_DELAY);
          if(digitalRead(tec)){
-            button_number = BUTTON_UP;
+            *ptr_button_number = BUTTON_UP;
             /* Dispara el evento */
             //buttonReleased();
          }
          else
-            button_number = BUTTON_DOWN;
+            *ptr_button_number = BUTTON_DOWN;
          break;
-      }
-      default:{
-         buttonMefInit(button_number);
       }
    }
 }

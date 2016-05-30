@@ -26,7 +26,7 @@ You should have received a copy of the GNU General Public License
 #ifndef _KEYS_H_ 
 #define _KEYS_H_ 
 #include"main.h"
-#define DEBOUNCE_DELAY (50)
+#define DEBOUNCE_DELAY (40)
 typedef enum{BUTTON_UP, BUTTON_FALLING, BUTTON_DOWN, BUTTON_RISING} button_state_t;
 /*==================[internal data declaration]==============================*/
 
@@ -52,7 +52,8 @@ void buttonMefInit(button_state_t button_number);
 void buttonPressed(DigitalIOMap_t tec);
 void incrementarContador(void);
 
-void buttonMefUpdate(DigitalIOMap_t tec, button_state_t button_number);
+//void buttonMefUpdate(DigitalIOMap_t tec, button_state_t button_number);
+void buttonMefUpdate(DigitalIOMap_t tec, button_state_t* ptr_button_number);
 //void buttonMefUpdate(DigitalIOMap_t tec);
 uint32_t sw1_pressed;
 uint32_t sw2_pressed;

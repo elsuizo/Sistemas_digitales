@@ -31,11 +31,12 @@ uint32_t sw4_pressed;
 
 void SYSTEM_init()
 {
-   modes_flag = ENTER;
-   //sw4_pressed = 0;
+   initialize_board();
+   modes_flag = NORMAL;
+   button_state3 = BUTTON_UP;
+   button_state4 = BUTTON_UP;
    buttonMefInit(button_state3);
    buttonMefInit(button_state4);
-   initialize_board();
 }
 
 void SYSTEM_change_mode(DigitalIOMap_t tec)
@@ -60,7 +61,18 @@ void SYSTEM_change_mode(DigitalIOMap_t tec)
          }
       case TEC3:
          {
-            digitalWrite(LEDR, ON);
+            digitalWrite(LED1, ON);
+            CLOCK_down();
+            break;
+         }
+      case TEC2:
+         {
+            CLOCK_up();
+            break;
+         }
+      case TEC1:
+         {
+            CLOCK_move_left();
             break;
          }
    }
