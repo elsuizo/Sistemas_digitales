@@ -25,7 +25,7 @@ You should have received a copy of the GNU General Public License
 #include"main.h"
 #include"system.h"
 #include"scheduler.h"
-//#include"keys.h"
+#include"keys.h"
 
 uint32_t sw4_pressed;
 
@@ -33,23 +33,36 @@ void SYSTEM_init()
 {
    modes_flag = ENTER;
    //sw4_pressed = 0;
-   buttonMefInit();
+   buttonMefInit(button_state3);
+   buttonMefInit(button_state4);
    initialize_board();
 }
 
-void SYSTEM_change_mode()
+void SYSTEM_change_mode(DigitalIOMap_t tec)
 {
-  if(modes_flag == ENTER) 
-  {
-     modes_flag = NORMAL;
-     digitalWrite(LEDG, ON);
-     digitalWrite(LEDR, OFF);
-  }
-  else
-  {
-     modes_flag = ENTER;
-     digitalWrite(LEDR, ON);
-     digitalWrite(LEDG, OFF);
-  }
+   switch(tec)
+   {
+      case TEC4:
+         {
+            if(modes_flag == ENTER) 
+            {
+               modes_flag = NORMAL;
+               digitalWrite(LEDG, ON);
+               digitalWrite(LEDR, OFF);
+            }
+            else
+            {
+               modes_flag = ENTER;
+               digitalWrite(LEDR, ON);
+               digitalWrite(LEDG, OFF);
+            }
+            break;
+         }
+      case TEC3:
+         {
+            digitalWrite(LEDR, ON);
+            break;
+         }
+   }
 }
 

@@ -26,7 +26,7 @@ You should have received a copy of the GNU General Public License
 #define _SYSTEM_H_
 #include"main.h"
 void SYSTEM_init();
-void SYSTEM_change_mode();
-//void SYSTEM_change_mode(DigitalIOMap_t tec);
+//void SYSTEM_change_mode();
+void SYSTEM_change_mode(DigitalIOMap_t tec);
 #endif
 
