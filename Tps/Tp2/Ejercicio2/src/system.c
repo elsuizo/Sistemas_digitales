@@ -1,13 +1,13 @@
 /* -------------------------------------------------------------------------
-@file system.c
+   @file system.c
 
-@date 05/27/16 19:42:29
-@author Martin Noblia
-@email martin.noblia@openmailbox.org
+   @date 05/27/16 19:42:29
+   @author Martin Noblia
+   @email martin.noblia@openmailbox.org
 
-@brief
+   @brief
 
-@detail
+   @detail
 
 Licence:
 This program is free software: you can redistribute it and/or modify
@@ -30,10 +30,23 @@ You should have received a copy of the GNU General Public License
 
 void SYSTEM_init()
 {
-   initialize_board();
+   initialize_board(); // board configurations
+   SCHEDULER_init();
+   uint8_t message[] = "hola"; // test message
+   /*------------------------------------------------------------------------------
+     tasks inits
+     ------------------------------------------------------------------------------*/
+   PC_LINK_init(115200);
+   CLOCK_task_init(message);
+   LED_toggle_task_init();
+   LED_toggle_task_init2();
    modes_flag = NORMAL;
-   button_state3 = BUTTON_UP;
    button_state4 = BUTTON_UP;
+   button_state3 = BUTTON_UP;
+   button_state2 = BUTTON_UP;
+   button_state1 = BUTTON_UP;
+   buttonMefInit(button_state1);
+   buttonMefInit(button_state2);
    buttonMefInit(button_state3);
    buttonMefInit(button_state4);
 }
@@ -44,17 +57,37 @@ void SYSTEM_change_mode(DigitalIOMap_t tec)
    {
       case TEC4:
          {
-            if(modes_flag == ENTER) 
+            switch(modes_flag)
             {
-               modes_flag = NORMAL;
-               digitalWrite(LEDG, ON);
-               digitalWrite(LEDR, OFF);
-            }
-            else
-            {
-               modes_flag = ENTER;
-               digitalWrite(LEDR, ON);
-               digitalWrite(LEDG, OFF);
+               case NORMAL:
+                  {
+                     modes_flag = ENTER;
+                     digitalWrite(LEDR, OFF);
+                     digitalWrite(LEDG, OFF);
+                     digitalWrite(LEDB, ON);
+                     break;
+                  }
+               case ENTER:
+                  {
+                     modes_flag = ALARM;
+                     digitalWrite(LEDR, ON);
+                     digitalWrite(LEDG, OFF);
+                     digitalWrite(LEDB, OFF);
+                     break;
+                  }
+               case ALARM:
+                  {
+                     modes_flag = NORMAL;
+                     digitalWrite(LEDR, OFF);
+                     digitalWrite(LEDG, ON);
+                     digitalWrite(LEDB, OFF);
+                     break;
+                  }
+               case DOALARM:
+                  {
+                     modes_flag = NORMAL;
+                     break;
+                  }
             }
             break;
          }

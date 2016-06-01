@@ -26,12 +26,18 @@
    final y volver a la posición inicial (cursor circular). Continuar con los dígitos de minutos y
    segundos. Finalmente, para introducir los cambios en la hora presionar ENTER.
    Utilizar el Led RGB para indicar mediante diferente color, el modo en el cual se encuentra.
-
-Licence:
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or (at
-your option) any later version.
+   b) Agregue el modo de configurar una alarma. Cuando se alcance dicho horario el reloj
+   deberá mostrar en la consola intermitentemente el mensaje:
+   HH:MM:SS ¡Alarma!
+   Además generar una señal lumínica intermitente de alama mediante un LED de la placa.
+   Para cancelar la alarma presionar ENTER
+   Debe utilizarse el sEOS cooperativo con interrupción única de timer (SysTick) para la
+   planificación y despacho de las tareas en la misma.
+   Licence:
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or (at
+   your option) any later version.
 
 This program is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -64,31 +70,34 @@ int main()
                               inits
    ------------------------------------------------------------------------------*/
    SYSTEM_init();
-   // tick rate
-   tick_t tick = 1;
-   SCHEDULER_init();
-   uint8_t message[] = "hola";
-   PC_LINK_init(115200);
-   CLOCK_task_init(message);
-   LED_toggle_task_init();
    /*------------------------------------------------------------------------------
                               NORMAL tasks
    ------------------------------------------------------------------------------*/
    SCHEDULER_add_task(CLOCK_task_update, 0, 1000, NORMAL); // update every 1 second
    SCHEDULER_add_task(LED_toggle_task_update, 9, 1000, NORMAL); // blink led every 1 second
    /*------------------------------------------------------------------------------
-                              ALLWAYS tasks
+                              ALWAYS tasks
    ------------------------------------------------------------------------------*/
-   SCHEDULER_add_task(KEYS_button_task_update, 3, 50, ALLWAYS); // update every 5 milliseconds
-   SCHEDULER_add_task(PC_LINK_task_update, 4, 5, ALLWAYS); // update every 5 milliseconds
+   SCHEDULER_add_task(KEYS_button_task_update, 3, 50, ALWAYS); // update every 5 milliseconds
+   SCHEDULER_add_task(PC_LINK_task_update, 4, 5, ALWAYS); // update every 5 milliseconds
+   SCHEDULER_add_task(CLOCK_task_check_alarm_update, 8, 500, ALWAYS); // update every 5 milliseconds
    /*------------------------------------------------------------------------------
                               ENTER tasks
    ------------------------------------------------------------------------------*/
-   SCHEDULER_add_task(CLOCK_task_set_hour_update, 0, 150, ENTER); // update every 1 second
+   SCHEDULER_add_task(CLOCK_task_set_hour_update, 0, 100, ENTER); // update every 1 second
+   /*------------------------------------------------------------------------------
+                              ALARM tasks
+   ------------------------------------------------------------------------------*/
+   SCHEDULER_add_task(CLOCK_task_set_alarm_update, 8, 100, ALARM); // update every 1 second
+   /*------------------------------------------------------------------------------
+                              DOALARM task
+   ------------------------------------------------------------------------------*/
+   SCHEDULER_add_task(CLOCK_do_alarm, 8, 100, DOALARM); // update every 1 second
+   SCHEDULER_add_task(LED_toggle_task_update2, 10, 300, DOALARM); // blink led every 1 second
    /*------------------------------------------------------------------------------
                               start scheduler
    ------------------------------------------------------------------------------*/
-   SCHEDULER_start(tick);
+   SCHEDULER_start(1); // initialize SCHDULER with tick rate 1
    /*------------------------------------------------------------------------------
                               main loop
    ------------------------------------------------------------------------------*/

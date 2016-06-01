@@ -1,13 +1,13 @@
 /* -------------------------------------------------------------------------
-@file pc_link.c
+   @file pc_link.c
 
-@date 05/23/16 17:37:15
-@author Martin Noblia
-@email martin.noblia@openmailbox.org
+   @date 05/23/16 17:37:15
+   @author Martin Noblia
+   @email martin.noblia@openmailbox.org
 
-@brief
+   @brief
 
-@detail
+   @detail
 
 Licence:
 This program is free software: you can redistribute it and/or modify
@@ -84,21 +84,21 @@ void PC_LINK_write_string_to_buffer(uint8_t *ptr_char)
       PC_LINK_write_char_to_buffer(ptr_char[i]);
       i++;
    }
-   
+
 }
 
 void PC_LINK_write_char_to_buffer(uint8_t data)
 {
-  // write to buffer only if there is space 
-  if(TX_write_index < TX_BUFFER_LENGTH)
-  {
-     TX_buffer[TX_write_index] = data;
-     TX_write_index++;
-  }
-  else
-  {
-     Error_code = ERROR_UART_FULL_BUFFER;
-  }
+   // write to buffer only if there is space 
+   if(TX_write_index < TX_BUFFER_LENGTH)
+   {
+      TX_buffer[TX_write_index] = data;
+      TX_write_index++;
+   }
+   else
+   {
+      Error_code = ERROR_UART_FULL_BUFFER;
+   }
 }
 
 

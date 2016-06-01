@@ -34,7 +34,7 @@ extern "C" {
 // The maximum number of tasks required at any one time during the execution
 // of the program
 // MUST BE ADJUSTED FOR EACH NEW PROJECT
-#define SCHEDULER_MAX_TASKS (7)
+#define SCHEDULER_MAX_TASKS (12)
 //
 //
 //// Store in DATA area, if possible, for rapid access
@@ -53,8 +53,10 @@ extern "C" {
 //   int RunMe;
 //} sTask;
 
-
-typedef enum {ENTER, NORMAL, ALLWAYS} system_mode;
+/*------------------------------------------------------------------------------
+                           modes of the system
+------------------------------------------------------------------------------*/
+typedef enum {ENTER, NORMAL, ALWAYS, ALARM, DOALARM} system_mode;
 // Store in DATA area, if possible, for rapid access
 // Total memory per task is 7 bytes
 system_mode modes_flag;
@@ -71,7 +73,7 @@ typedef struct
    int Period;
    // Incremented (by scheduler) when task is due to execute
    int RunMe;
-
+   // flag
    system_mode state_flag;
 } sTask;
 

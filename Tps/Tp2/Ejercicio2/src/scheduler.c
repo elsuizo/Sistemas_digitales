@@ -1,13 +1,13 @@
 /* -------------------------------------------------------------------------
-@file SCHEDULER.c
+   @file SCHEDULER.c
 
-@date 05/23/16 17:13:23
-@author Martin Noblia
-@email martin.noblia@openmailbox.org
+   @date 05/23/16 17:13:23
+   @author Martin Noblia
+   @email martin.noblia@openmailbox.org
 
-@brief
+   @brief
 
-@detail
+   @detail
 
 Licence:
 This program is free software: you can redistribute it and/or modify
@@ -47,11 +47,11 @@ char Error_code = 0;
 
 
 /*------------------------------------------------------------------*-
-SCH_Dispatch_Tasks()
-This is the 'dispatcher' function. When a task (function)
-is due to run, SCH_Dispatch_Tasks() will run it.
-This function must be called (repeatedly) from the main loop.
--*------------------------------------------------------------------*/
+  SCH_Dispatch_Tasks()
+  This is the 'dispatcher' function. When a task (function)
+  is due to run, SCH_Dispatch_Tasks() will run it.
+  This function must be called (repeatedly) from the main loop.
+  -*------------------------------------------------------------------*/
 void SCHEDULER_dispatch_task(void)
 {
    int Index;
@@ -62,7 +62,7 @@ void SCHEDULER_dispatch_task(void)
          {
             for (Index = 0; Index < SCHEDULER_MAX_TASKS; Index++)
             {
-               if ((SCH_tasks[Index].RunMe > 0)&& (SCH_tasks[Index].state_flag == ENTER)||(SCH_tasks[Index].state_flag==ALLWAYS))
+               if ((SCH_tasks[Index].RunMe > 0)&& (SCH_tasks[Index].state_flag == ENTER)||(SCH_tasks[Index].state_flag==ALWAYS))
 
                {
                   (*SCH_tasks[Index].pTask)(); // Run the task
@@ -81,7 +81,43 @@ void SCHEDULER_dispatch_task(void)
          {
             for (Index = 0; Index < SCHEDULER_MAX_TASKS; Index++)
             {
-               if ((SCH_tasks[Index].RunMe > 0)&&(SCH_tasks[Index].state_flag == NORMAL)||(SCH_tasks[Index].state_flag==ALLWAYS))
+               if ((SCH_tasks[Index].RunMe > 0)&&(SCH_tasks[Index].state_flag == NORMAL)||(SCH_tasks[Index].state_flag==ALWAYS))
+               {
+                  (*SCH_tasks[Index].pTask)(); // Run the task
+                  SCH_tasks[Index].RunMe -= 1; // Reset / reduce RunMe flag
+                  // Periodic tasks will automatically run again
+                  // - if this is a 'one shot' task, remove it from the array
+                  if (SCH_tasks[Index].Period == 0)
+                  {
+                     SCHEDULER_delete_task(Index);
+                  }
+               }
+            }
+            break;
+         }
+      case ALARM:
+         {
+            for (Index = 0; Index < SCHEDULER_MAX_TASKS; Index++)
+            {
+               if ((SCH_tasks[Index].RunMe > 0)&&(SCH_tasks[Index].state_flag == ALARM)||(SCH_tasks[Index].state_flag==ALWAYS))
+               {
+                  (*SCH_tasks[Index].pTask)(); // Run the task
+                  SCH_tasks[Index].RunMe -= 1; // Reset / reduce RunMe flag
+                  // Periodic tasks will automatically run again
+                  // - if this is a 'one shot' task, remove it from the array
+                  if (SCH_tasks[Index].Period == 0)
+                  {
+                     SCHEDULER_delete_task(Index);
+                  }
+               }
+            }
+            break;
+         }
+      case DOALARM:
+         {
+            for (Index = 0; Index < SCHEDULER_MAX_TASKS; Index++)
+            {
+               if ((SCH_tasks[Index].RunMe > 0)&&(SCH_tasks[Index].state_flag == DOALARM)||(SCH_tasks[Index].state_flag==ALWAYS))
                {
                   (*SCH_tasks[Index].pTask)(); // Run the task
                   SCH_tasks[Index].RunMe -= 1; // Reset / reduce RunMe flag
@@ -96,7 +132,7 @@ void SCHEDULER_dispatch_task(void)
             break;
          }
    }
-   
+
    // Report system status
    SCHEDULER_report_status();
    // The scheduler enters idle mode at this point
@@ -104,10 +140,10 @@ void SCHEDULER_dispatch_task(void)
 }
 
 /*------------------------------------------------------------------*-
-SCH_Add_Task()
-Causes a task (function) to be executed at regular intervals
-or after a user-defined delay
-Fn_P - The name of the function which is to be scheduled.
+  SCH_Add_Task()
+  Causes a task (function) to be executed at regular intervals
+  or after a user-defined delay
+  Fn_P - The name of the function which is to be scheduled.
 NOTE: All scheduled functions must be 'void, void' -
 that is, they must take no parameters, and have
 a void return type.
@@ -162,13 +198,13 @@ char SCHEDULER_add_task(void (* pFunction)(void), const int DELAY, const int PER
 }
 
 /*------------------------------------------------------------------*-
-SCH_Delete_Task()
-Removes a task from the scheduler. Note that this does
-*not* delete the associated function from memory:
-it simply means that it is no longer called by the scheduler.
-TASK_INDEX - The task index. Provided by SCH_Add_Task().
-RETURN VALUE: RETURN_ERROR or RETURN_NORMAL
--*------------------------------------------------------------------*/
+  SCH_Delete_Task()
+  Removes a task from the scheduler. Note that this does
+ *not* delete the associated function from memory:
+ it simply means that it is no longer called by the scheduler.
+ TASK_INDEX - The task index. Provided by SCH_Add_Task().
+ RETURN VALUE: RETURN_ERROR or RETURN_NORMAL
+ -*------------------------------------------------------------------*/
 char SCHEDULER_delete_task(const int TASK_INDEX)
 {
    char Return_code;
@@ -194,17 +230,17 @@ char SCHEDULER_delete_task(const int TASK_INDEX)
 }
 
 /*------------------------------------------------------------------*-
-SCH_Report_Status()
-Simple function to display error codes.
-This version displays code on a port with attached LEDs:
-adapt, if required, to report errors over serial link, etc.
-Errors are only displayed for a limited period
-(60000 ticks = 1 minute at 1ms tick interval).
-After this the the error code is reset to 0.
-This code may be easily adapted to display the last
-error 'for ever': this may be appropriate in your
-application.
--*------------------------------------------------------------------*/
+  SCH_Report_Status()
+  Simple function to display error codes.
+  This version displays code on a port with attached LEDs:
+  adapt, if required, to report errors over serial link, etc.
+  Errors are only displayed for a limited period
+  (60000 ticks = 1 minute at 1ms tick interval).
+  After this the the error code is reset to 0.
+  This code may be easily adapted to display the last
+  error 'for ever': this may be appropriate in your
+  application.
+  -*------------------------------------------------------------------*/
 void SCHEDULER_report_status(void)
 {
 #ifdef SCH_REPORT_ERRORS
@@ -238,13 +274,13 @@ void SCHEDULER_report_status(void)
 }
 
 /*------------------------------------------------------------------*-
-SCH_Go_To_Sleep()
-This scheduler enters 'idle mode' between clock ticks
-to save power. The next clock tick will return the processor
-to the normal operating state.
-*** May wish to disable this if using a watchdog ***
-*** ADAPT AS REQUIRED FOR YOUR HARDWARE ***
--*------------------------------------------------------------------*/
+  SCH_Go_To_Sleep()
+  This scheduler enters 'idle mode' between clock ticks
+  to save power. The next clock tick will return the processor
+  to the normal operating state.
+ *** May wish to disable this if using a watchdog ***
+ *** ADAPT AS REQUIRED FOR YOUR HARDWARE ***
+ -*------------------------------------------------------------------*/
 static void SCHEDULER_go_to_sleep()
 {
    __asm volatile( "wfi" ); /* Wait for interrupt */
