@@ -29,33 +29,32 @@ You should have received a copy of the GNU General Public License
 #include"keys.h"
 
 /*------------------------------------------------------------------------------
-  global variables
+  global internal variables
   ------------------------------------------------------------------------------*/
-display_states clock_states;
+ display_states clock_states;
 
-char CHARMAP[] = "0123456789";
-uint8_t  hs;
-uint8_t  min;
-uint8_t  seg;
+ char CHARMAP[] = "0123456789";
+ uint8_t  hs;
+ uint8_t  min;
+ uint8_t  seg;
 
-uint8_t* ptr_hs = &hs;
-uint8_t* ptr_min = &min;
-uint8_t* ptr_seg = &seg;
+ uint8_t* ptr_hs = &hs;
+ uint8_t* ptr_min = &min;
+ uint8_t* ptr_seg = &seg;
 
-uint8_t  hs_alarm = 0;
-uint8_t  min_alarm = 1;
-uint8_t  seg_alarm = 0;
+ uint8_t  hs_alarm = 0;
+ uint8_t  min_alarm = 1;
+ uint8_t  seg_alarm = 0;
 
-uint8_t* ptr_hs_alarm = &hs_alarm;
-uint8_t* ptr_min_alarm = &min_alarm;
-uint8_t* ptr_seg_alarm = &seg_alarm;
+ uint8_t* ptr_hs_alarm = &hs_alarm;
+ uint8_t* ptr_min_alarm = &min_alarm;
+ uint8_t* ptr_seg_alarm = &seg_alarm;
 
-uint8_t CLOCK_string[] = "\rReloj: HH:MM:SS";
-uint8_t CLOCK_string_alarm[] = "\rAlarma: HH:MM:SS";
-uint8_t CLOCK_string_min[] = "\rminutos: MM";
-uint8_t CLOCK_string_hs[] = "\rhora: HH";
-uint8_t CLOCK_string_seg[] = "\rsegundos: SS";
-
+ uint8_t CLOCK_string[] = "\rReloj: HH:MM:SS";
+ uint8_t CLOCK_string_alarm[] = "\rAlarma!!!";
+ uint8_t CLOCK_string_min[] = "\rminutos: MM";
+ uint8_t CLOCK_string_hs[] = "\rhora: HH";
+ uint8_t CLOCK_string_seg[] = "\rsegundos: SS";
 /*------------------------------------------------------------------------------
   function definitions
   ------------------------------------------------------------------------------*/
@@ -98,16 +97,19 @@ void CLOCK_task_set_hour_update()
    {
       case HH:
          {
+            CLOCK_clean_terminal();
             PC_LINK_write_string_to_buffer(CLOCK_string_hs);
             break;
          }
       case MM:
          {
+            CLOCK_clean_terminal();
             PC_LINK_write_string_to_buffer(CLOCK_string_min);
             break;
          }
       case SS:
          {
+            CLOCK_clean_terminal();
             PC_LINK_write_string_to_buffer(CLOCK_string_seg);
             break;
          }
@@ -121,16 +123,19 @@ void CLOCK_task_set_alarm_update()
    {
       case HH:
          {
+            CLOCK_clean_terminal();
             PC_LINK_write_string_to_buffer(CLOCK_string_hs);
             break;
          }
       case MM:
          {
+            CLOCK_clean_terminal();
             PC_LINK_write_string_to_buffer(CLOCK_string_min);
             break;
          }
       case SS:
          {
+            CLOCK_clean_terminal();
             PC_LINK_write_string_to_buffer(CLOCK_string_seg);
             break;
          }
@@ -146,26 +151,29 @@ void CLOCK_down()
             {
                case HH:
                   {
+                     CLOCK_clean_terminal();
                      --(*ptr_hs);
                      CLOCK_string_hs[7]   =  CHARMAP[(*ptr_hs)/10];
                      CLOCK_string_hs[8]   =  CHARMAP[(*ptr_hs)%10];
-                     CLOCK_clean_terminal();
+                     PC_LINK_write_string_to_buffer(CLOCK_string_hs);
                      break;
                   }
                case MM:
                   {
+                     CLOCK_clean_terminal();
                      --(*ptr_min);
                      CLOCK_string_min[10]  =  CHARMAP[(*ptr_min)/10];
                      CLOCK_string_min[11]  =  CHARMAP[(*ptr_min)%10];
-                     CLOCK_clean_terminal();
+                     PC_LINK_write_string_to_buffer(CLOCK_string_min);
                      break;
                   }
                case SS:
                   {
+                     CLOCK_clean_terminal();
                      --(*ptr_seg);
                      CLOCK_string_seg[11]  =  CHARMAP[(*ptr_seg)/10];
                      CLOCK_string_seg[12]  =  CHARMAP[(*ptr_seg)%10];
-                     CLOCK_clean_terminal();
+                     PC_LINK_write_string_to_buffer(CLOCK_string_seg);
                      break;
                   }
             }
@@ -177,26 +185,26 @@ void CLOCK_down()
             {
                case HH:
                   {
+                     CLOCK_clean_terminal();
                      --(*ptr_hs_alarm);
                      CLOCK_string_hs[7]   =  CHARMAP[(*ptr_hs_alarm)/10];
                      CLOCK_string_hs[8]   =  CHARMAP[(*ptr_hs_alarm)%10];
-                     CLOCK_clean_terminal();
                      break;
                   }
                case MM:
                   {
+                     CLOCK_clean_terminal();
                      --(*ptr_min_alarm);
                      CLOCK_string_min[10]  =  CHARMAP[(*ptr_min_alarm)/10];
                      CLOCK_string_min[11]  =  CHARMAP[(*ptr_min_alarm)%10];
-                     CLOCK_clean_terminal();
                      break;
                   }
                case SS:
                   {
+                     CLOCK_clean_terminal();
                      --(*ptr_seg_alarm);
                      CLOCK_string_seg[11]  =  CHARMAP[(*ptr_seg_alarm)/10];
                      CLOCK_string_seg[12]  =  CHARMAP[(*ptr_seg_alarm)%10];
-                     CLOCK_clean_terminal();
                      break;
                   }
             }
@@ -215,26 +223,26 @@ void CLOCK_up()
             {
                case HH:
                   {
+                     CLOCK_clean_terminal();
                      ++(*ptr_hs);
                      CLOCK_string_hs[7]   =  CHARMAP[(*ptr_hs)/10];
                      CLOCK_string_hs[8]   =  CHARMAP[(*ptr_hs)%10];
-                     CLOCK_clean_terminal();
                      break;
                   }
                case MM:
                   {
+                     CLOCK_clean_terminal();
                      ++(*ptr_min);
                      CLOCK_string_min[10]  =  CHARMAP[(*ptr_min)/10];
                      CLOCK_string_min[11]  =  CHARMAP[(*ptr_min)%10];
-                     CLOCK_clean_terminal();
                      break;
                   }
                case SS:
                   {
+                     CLOCK_clean_terminal();
                      ++(*ptr_seg);
                      CLOCK_string_seg[11]  =  CHARMAP[(*ptr_seg)/10];
                      CLOCK_string_seg[12]  =  CHARMAP[(*ptr_seg)%10];
-                     CLOCK_clean_terminal();
                      break;
                   }
             }
@@ -246,26 +254,26 @@ void CLOCK_up()
             {
                case HH:
                   {
+                     CLOCK_clean_terminal();
                      ++(*ptr_hs_alarm);
                      CLOCK_string_hs[7]   =  CHARMAP[(*ptr_hs_alarm)/10];
                      CLOCK_string_hs[8]   =  CHARMAP[(*ptr_hs_alarm)%10];
-                     CLOCK_clean_terminal();
                      break;
                   }
                case MM:
                   {
+                     CLOCK_clean_terminal();
                      ++(*ptr_min_alarm);
                      CLOCK_string_min[10]  =  CHARMAP[(*ptr_min_alarm)/10];
                      CLOCK_string_min[11]  =  CHARMAP[(*ptr_min_alarm)%10];
-                     CLOCK_clean_terminal();
                      break;
                   }
                case SS:
                   {
+                     CLOCK_clean_terminal();
                      ++(*ptr_seg_alarm);
                      CLOCK_string_seg[11]  =  CHARMAP[(*ptr_seg_alarm)/10];
                      CLOCK_string_seg[12]  =  CHARMAP[(*ptr_seg_alarm)%10];
-                     CLOCK_clean_terminal();
                      break;
                   }
             }
@@ -294,6 +302,7 @@ void CLOCK_set_alarm_flag()
 
 void CLOCK_do_alarm()
 {
+   CLOCK_clean_terminal();
    PC_LINK_write_string_to_buffer(CLOCK_string_alarm);
 }
 

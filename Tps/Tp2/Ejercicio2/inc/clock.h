@@ -29,9 +29,6 @@ You should have received a copy of the GNU General Public License
 /*------------------------------------------------------------------------------
                            global variables
 ------------------------------------------------------------------------------*/
-uint8_t* ptr_hs; 
-uint8_t* ptr_min;
-uint8_t* ptr_seg;
 typedef enum{HH, MM, SS} display_states;
 /*------------------------------------------------------------------------------
                            functions
