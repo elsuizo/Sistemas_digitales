@@ -27,90 +27,67 @@ You should have received a copy of the GNU General Public License
 /* Variable de estado del boton */
 #include"main.h"
 #include"system.h"
-button_state_t button_state = BUTTON_UP;
+//button_state_t button_state = BUTTON_UP;
 
-/* Variable de estado del Led */
+button_state_t* ptr_button_state1 = &button_state1;
+button_state_t* ptr_button_state2 = &button_state2;
+button_state_t* ptr_button_state3 = &button_state3;
+button_state_t* ptr_button_state4 = &button_state4;
 
-//uint8_t keys_led_state = OFF;
-///* Variable de conteo de teclas pulsadas */
-//uint8_t counter = 0;
-//
-//void ledMefInit(void){
-//   keys_led_state = OFF;
-//}
-//
-//void ledMefUpdate(void){
-//   if(keys_led_state)
-//      keys_led_state = OFF;
-//   else
-//      keys_led_state = ON;
-//   digitalWrite( LEDB, keys_led_state );
-//}
-
+void KEYS_button_task_update()   
+{
+   buttonMefUpdate(TEC4, ptr_button_state4);
+   buttonMefUpdate(TEC3, ptr_button_state3);
+   buttonMefUpdate(TEC2, ptr_button_state2);
+   buttonMefUpdate(TEC1, ptr_button_state1);
+}
+/* Evento que se ejecuta cuando se Presiona el boton */
+void buttonPressed(DigitalIOMap_t tec)
+{
+   /* Hacer algo al presionar el boton */
+   SYSTEM_change_mode(tec);
+}
 /* MEF para manejo de Boton */
 
-void buttonMefInit(void){
-   button_state = BUTTON_UP;
+void buttonMefInit(button_state_t button_number)
+{
+   button_number = BUTTON_UP;
 }
 
-void buttonMefUpdate(DigitalIOMap_t tec)
+void buttonMefUpdate(DigitalIOMap_t tec, button_state_t* ptr_button_number)
 {
-   switch(button_state){
+   switch(*ptr_button_number){
       case BUTTON_UP:{
          if(!digitalRead(tec))
-            button_state = BUTTON_FALLING;
+            *ptr_button_number = BUTTON_FALLING;
          break;
       }
       case BUTTON_FALLING:{
          delay(DEBOUNCE_DELAY);
          if(!digitalRead(tec)){
-            button_state = BUTTON_DOWN;
+            *ptr_button_number = BUTTON_DOWN;
             /* Dispara el evento */
-            buttonPressed();
+            buttonPressed(tec);
          }
          else
-            button_state = BUTTON_UP;
+            *ptr_button_number = BUTTON_UP;
          break;
       }
       case BUTTON_DOWN:{
          if(digitalRead(tec))
-            button_state = BUTTON_RISING;
+            *ptr_button_number = BUTTON_RISING;
          break;
       }
       case BUTTON_RISING:{
          delay(DEBOUNCE_DELAY);
          if(digitalRead(tec)){
-            button_state = BUTTON_UP;
+            *ptr_button_number = BUTTON_UP;
             /* Dispara el evento */
             //buttonReleased();
          }
          else
-            button_state = BUTTON_DOWN;
+            *ptr_button_number = BUTTON_DOWN;
          break;
-      }
-      default:{
-         buttonMefInit();
       }
    }
 }
-
-
-/* Evento que se ejecuta cuando se Libera el boton */
-//void buttonReleased(void){
-//   /* Hacer algo al liberar el boton */
-//   ledMefUpdate();
-//}
-
-/* Evento que se ejecuta cuando se Presiona el boton */
-void buttonPressed(void){
-   /* Hacer algo al presionar el boton */
-   SYSTEM_change_mode();
-}
-	
-void KEYS_button_task_update()   
-{
-   //buttonPressed();
-   buttonMefUpdate(TEC4);
-   //buttonMefUpdate(TEC4);
-}
-

@@ -25,13 +25,26 @@ You should have received a copy of the GNU General Public License
 #ifndef CLOCK_H_
 #define CLOCK_H_
 #include"main.h"
-//#include"sAPI.h"
 
+/*------------------------------------------------------------------------------
+                           global variables
+------------------------------------------------------------------------------*/
+typedef enum{HH, MM, SS} display_states;
+/*------------------------------------------------------------------------------
+                           functions
+------------------------------------------------------------------------------*/
+void CLOCK_down();
+void CLOCK_up();
+void CLOCK_move_left();
 void CLOCK_clean_terminal(void);
 void CLOCK_clean_line_screen(void);
 void CLOCK_task_init();
 void CLOCK_task_update();
 void CLOCK_modes_task_update();
 void CLOCK_task_set_hour_update();
-////void CLOCK_setup_hour();
+void CLOCK_show_update();
+void CLOCK_task_set_alarm_update();
+void CLOCK_task_check_alarm_update();
+void CLOCK_do_alarm();
+void CLOCK_set_alarm_flag();
 #endif

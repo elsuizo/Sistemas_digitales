@@ -42,18 +42,19 @@ button_state_t button_state4;
 //void ledMefUpdate(void);
 
 /* MEF para manejo de Boton */
-void buttonMefInit(void);
-//void buttonMefInit(button_state_t button_number);
+//void buttonMefInit(void);
+void buttonMefInit(button_state_t button_number);
 //void buttonMefUpdate(void);
 //void buttonMefUpdate(DigitalIOMap_t);
 /* Eventos de Boton */
 //void buttonReleased(void);
-void buttonPressed(void);
-//void buttonPressed(DigitalIOMap_t tec);
+//void buttonPressed(void);
+void buttonPressed(DigitalIOMap_t tec);
 void incrementarContador(void);
 
 //void buttonMefUpdate(DigitalIOMap_t tec, button_state_t button_number);
-void buttonMefUpdate(DigitalIOMap_t tec);
+void buttonMefUpdate(DigitalIOMap_t tec, button_state_t* ptr_button_number);
+//void buttonMefUpdate(DigitalIOMap_t tec);
 uint32_t sw1_pressed;
 uint32_t sw2_pressed;
 uint32_t sw3_pressed;

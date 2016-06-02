@@ -49,7 +49,7 @@ void LED_toggle_task_update()
 void LED_toggle_task_init2()
 {
    led_state2 = OFF;
-   led2 = LED2;
+   led2 = LED1;
 }
 
 

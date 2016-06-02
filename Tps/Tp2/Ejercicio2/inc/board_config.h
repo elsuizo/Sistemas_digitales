@@ -26,7 +26,9 @@ You should have received a copy of the GNU General Public License
 #define _BOARD_CONFIG_ 
 #include"sAPI.h"
 
-
+/*------------------------------------------------------------------------------
+                           board initialization
+------------------------------------------------------------------------------*/
 void initialize_board(void);
 
 #endif
