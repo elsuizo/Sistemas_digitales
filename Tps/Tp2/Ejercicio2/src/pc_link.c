@@ -39,10 +39,10 @@ extern uint32_t Error_code;
 
 // ------ Private constants ----------------------------------------
 
-// Largo de buffer de recepcion
+// buffer RX(reception) length
 #define RX_BUFFER_LENGTH 5
 
-// Largo de buffer de transmision
+// buffer TX(transmision) length
 #define TX_BUFFER_LENGTH 50
 
 
@@ -57,7 +57,6 @@ void PC_LINK_init(uint32_t baud_rate)
 {
    uartConfig(UART_USB, baud_rate);
 }
-// update the conection?
 void PC_LINK_task_update(void)
 {
    //SYSTEM_change_mode();

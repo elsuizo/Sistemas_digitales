@@ -61,26 +61,26 @@ void SYSTEM_change_mode(DigitalIOMap_t tec)
             {
                case NORMAL:
                   {
-                     modes_flag = ENTER;
                      digitalWrite(LEDR, OFF);
                      digitalWrite(LEDG, OFF);
                      digitalWrite(LEDB, ON);
+                     modes_flag = ENTER;
                      break;
                   }
                case ENTER:
                   {
-                     modes_flag = ALARM;
                      digitalWrite(LEDR, ON);
                      digitalWrite(LEDG, OFF);
                      digitalWrite(LEDB, OFF);
+                     modes_flag = ALARM;
                      break;
                   }
                case ALARM:
                   {
-                     modes_flag = NORMAL;
-                     digitalWrite(LEDR, OFF);
                      digitalWrite(LEDG, ON);
                      digitalWrite(LEDB, OFF);
+                     digitalWrite(LEDR, OFF);
+                     modes_flag = NORMAL;
                      break;
                   }
                case DOALARM:
