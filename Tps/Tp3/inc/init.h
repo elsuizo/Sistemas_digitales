@@ -24,6 +24,7 @@ You should have received a copy of the GNU General Public License
 ---------------------------------------------------------------------------*/
 #ifndef __INIT_H__
 #define __INIT_H__
-
+#include "main.h"
+#include "sAPI.h"
 void initHardware(void);
 #endif

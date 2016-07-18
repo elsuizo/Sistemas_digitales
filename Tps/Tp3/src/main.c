@@ -11,6 +11,7 @@
 #include "UART.h"
 #include "init.h"
  
+static void prvPrintTask( void *pvParameters );
 
 static char *pcStringsToPrint[] =
 {
@@ -18,7 +19,6 @@ static char *pcStringsToPrint[] =
 	"Task 2 ----------------------------------------------------\n",
 };
 
-static void prvPrintTask( void *pvParameters );
 
 int main( void )
 {
@@ -79,6 +79,6 @@ int iIndexToString;
 		not care what value is returned.  in a more secure application a version
 		of rand() that is known to be re-entrant should be used - or calls to
 		rand() should be protected using a critical section. */
-		//vtaskdelay( ( rand() & 0x1ff ) );
+		vTaskDelay( ( rand() & 0x1FF ) );
 	}
 }

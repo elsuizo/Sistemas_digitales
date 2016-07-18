@@ -22,6 +22,36 @@ General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 ---------------------------------------------------------------------------*/
+#include"init.h"
 
+void initHardware(void)
+{
+
+   /* Inicializar la placa */
+   boardConfig();
+   
+   Board_Init(); // <-- NECESARIO PARA QUE COMPILE
+
+   /* Inicializar DigitalIO */
+   digitalConfig( 0, ENABLE_DIGITAL_IO );
+
+   /* Configuración de pines de entrada para
+	   Teclas de la CIAA-NXP */
+   digitalConfig( TEC1, INPUT );
+   digitalConfig( TEC2, INPUT );
+   digitalConfig( TEC3, INPUT );
+   digitalConfig( TEC4, INPUT );
+
+   /* Configuración de pines de salida para
+	   Leds de la CIAA-NXP */
+   digitalConfig( LEDR, OUTPUT );
+   digitalConfig( LEDG, OUTPUT );
+   digitalConfig( LEDB, OUTPUT );
+   digitalConfig( LED1, OUTPUT );
+   digitalConfig( LED2, OUTPUT );
+   digitalConfig( LED3, OUTPUT );
+   /* Inicializar Uart */
+   uartConfig( UART_USB, 115200 );
+}
 
 
