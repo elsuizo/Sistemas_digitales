@@ -1,0 +1,72 @@
+* Respuestas de TP3
+** Cuestionario sobre RTOS
+   1. Describa en forma general, los esquemas Cooperativos y 
+      Apropiativos(Pre-emptives), muestre las diferencias mas importantes, en 
+      cuanto a su forma de operacion e implementacion
+
+   2. Explique como puede implementarse en C, un modelo de maquinas de 
+      estados finitos en el contexto de un planificador apropiativo. Que 
+      diferencias y similitudes hay con la implementacion en sistemas 
+      cooperativos puros como el visto en el TP anterior?
+   3. Describa el modelo de tareas de cinco estados de un sistema apropiativo 
+      generico. Comente algunas posibilidades de como implementar la 
+      planificacion de tares segun dicho modelo, utilizando colas FIFO para 
+      administrar las tareas segun su prioridad y los eventos que hay que 
+      esperar.
+   4. Que es un bloque de control de tareas? Porque es necesaria su 
+      utilizacion en un sistema apropiativo? Que entiende por cambio de 
+      contexto de tareas?
+   5. Que es un RTOS? Cuales son las ventajas y desventajas de utilizarlo en 
+      un sistema embebido?
+   6. Un RTOS podria contener solo tareas periodicas y controlar los eventos 
+      por pooling(caso Pont) Que ventajas y desventajas tendria este esquema 
+      respecto a uno que se maneje x multiples interrupciones?
+
+** FreeRTOS
+   7. En el concepto del FreeRTOS, explique cuales son los estados de las 
+      tareas en este sistema y porque razon se realizan los cambios de 
+      estado.
+   8. Que tipos de tareas pueden implementarse en FreeRTOS y cuales son los 
+      mecanismos para implementarlos?
+   9. Describa como se implementan las tareas del usuario. Que 
+      caracteristicas tienen que tener? Como se inserta una nueva tarea al 
+      planificador? Como se eliminan las tareas?
+   10. Cual es el algoritmo de planificacion utilizado en este sistema y que 
+       consideraciones debe tenerse para el disenio de un proyecto? Que 
+       sucede si una tarea de alta prioridad nunca se retira del estado 
+       lista(ready). Como se quita una tarea del estado de tareas listas?
+   11. Investigue sobre el uso de FreeRTOS en modo cooperativo, analice sus 
+       ventajas y desventajas respecto del modo apropiativo.
+** OSEK-OS
+   12. En el contexto del FREE-OSEK(provisto en Firmware CIAA), responda las 
+       preguntas 7, 8, 9 y 10 destacando las principales diferencias de 
+       funcionamiento y configuracion entre ambos sistemas
+   13. Porque FREE-OSEK es generado y estatico? Y es cooperativo, aporpiativo 
+       o ambos?
+** Cuestionario IPC
+   1. Que es una seccion critica? Que es y como puede implementarse la 
+      exclusion mutua? Que metodos pueden aplicarse para acceder a la misma 
+      sin inconvenientes?
+   2. Explique que es un semaforo binario y un semaforo contador y cuales son 
+     sus metodos atomicos para operarlo. Realice un diagrama de flujo de 
+      estos metodos
+   3. Explique con un ejemplo las siguientes aplicaciones de los semaforos
+      para sincronizacion y comunicacion entre tareas:
+      - Sincronizacion a punto de reunion
+      - Exclusion mutua
+      - Comunicacion por mailbox
+      - Comunicacion por colas
+
+   4. Cuales son los mecanismos de sincronizacion y comunicacion entre tareas 
+      que brinda FREE-RTOS? Describa los semaforos binarios, contadores y 
+      mutex. Cuando utilizaria uno u otro?
+   5. Expique que es la inversion propiedades y el deadlock que pueden darse 
+      al utilizar los mecanismos mencionados anteriormente. Describa el 
+      protocolo Priority Inheritance que posee FREE-RTOS para lidiar con este 
+      inconveniente
+   6. Investigue sobre los tipos de recursos IPC disponibles en FREE-OSEK y 
+      describa el mecanismo Priority Ceiling Protocol(Protocolo de elevecion 
+      de prioridad) para prevenir la inversion de prioridades y el deadlock
+   7. Explique que son y como se utilizan las alarmas de FREE-OSEK. Es 
+      posible implenentar un sistema cooperativo como el de Pont, utilizando 
+      Alarmas?

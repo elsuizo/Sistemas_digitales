@@ -7,96 +7,78 @@
 #include "queue.h"
 
 #include "main.h"
+#include "utils.h"
+#include "UART.h"
+#include "init.h"
+ 
 
-static void initHardware(void);
-
-/* char* itoa(int value, char* result, int base) { */
-/*    // check that the base if valid */
-/*    if (base < 2 || base > 36) { *result = '\0'; return result; } */
-/*  */
-/*    char* ptr = result, *ptr1 = result, tmp_char; */
-/*    int tmp_value; */
-/*  */
-/*    do { */
-/*       tmp_value = value; */
-/*       value /= base; */
-/*       *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)]; */
-/*    } while ( value ); */
-/*  */
-/*    // Apply negative sign */
-/*    if (tmp_value < 0) *ptr++ = '-'; */
-/*    *ptr-- = '\0'; */
-/*    while(ptr1 < ptr) { */
-/*       tmp_char = *ptr; */
-/*       *ptr--= *ptr1; */
-/*       *ptr1++ = tmp_char; */
-/*    } */
-/*    return result; */
-/* } */
-
-static void initHardware(void)
+static char *pcStringsToPrint[] =
 {
-   /* Inicializar la placa */
-   boardConfig();
-   
-   Board_Init(); // <-- NECESARIO PARA QUE COMPILE
+	"Task 1 ****************************************************\n",
+	"Task 2 ----------------------------------------------------\n",
+};
 
-   /* Inicializar DigitalIO */
-   digitalConfig( 0, ENABLE_DIGITAL_IO );
-
-   /* Configuración de pines de entrada para
-	   Teclas de la CIAA-NXP */
-   digitalConfig( TEC1, INPUT );
-   digitalConfig( TEC2, INPUT );
-   digitalConfig( TEC3, INPUT );
-   digitalConfig( TEC4, INPUT );
-
-   /* Configuración de pines de salida para
-	   Leds de la CIAA-NXP */
-   digitalConfig( LEDR, OUTPUT );
-   digitalConfig( LEDG, OUTPUT );
-   digitalConfig( LEDB, OUTPUT );
-   digitalConfig( LED1, OUTPUT );
-   digitalConfig( LED2, OUTPUT );
-   digitalConfig( LED3, OUTPUT );
-    
-   /* Inicializar Uart */
-   uartConfig( UART_USB, 115200 );
-}
-
-void vPrintString( char * string){
-   uartWriteString( UART_USB, (uint8_t *) string );
-}
-void vPrintNumber( int32_t number){
-   uint8_t uartBuff[10];
-   /* Conversión de number entero a ascii con base decimal */
-   itoa( number, uartBuff, 10 ); /* 10 significa decimal */
-   /* Enviar number */
-   uartWriteString(UART_USB, uartBuff);
-}
-void vPrintStringAndNumber( char * string, int32_t number){
-   vPrintString( string );
-   vPrintNumber( number );
-   vPrintString( "\r\n" );
-}
-
-/*==================[external functions definition]==========================*/
-
-
-/* The tasks to be created.  Two instances are created of the sender task while
-only a single instance is created of the receiver task. */
-static void UARTGatekeeperTask( void *pvParameters );
-/*-----------------------------------------------------------*/
-
-/* Declare a variable of type xQueueHandle.  This is used to store the queue
-that is accessed by all three tasks. */
-xQueueHandle xQueue;
-
+static void prvPrintTask( void *pvParameters );
 
 int main( void )
 {
 	 initHardware();
    
+    /* Before a queue is used it must be explicitly created.  The queue is created
+	to hold a maximum of 5 character pointers. */
+    xUARTQueue = xQueueCreate( 5, sizeof( char * ) );
+
+	/* The tasks are going to use a pseudo random delay, seed the random number
+	generator. */
+
+	/* Check the queue was created successfully. */
+	if(xUARTQueue != NULL)
+	{
+		/* Create two instances of the tasks that send messages to the gatekeeper.
+		The	index to the string they attempt to write is passed in as the task
+		parameter (4th parameter to xTaskCreate()).  The tasks are created at
+		different priorities so some pre-emption will occur. */
+		xTaskCreate(prvPrintTask, "Print1", 240, ( void * ) 0, 1, NULL );
+		xTaskCreate(prvPrintTask, "Print2", 240, ( void * ) 1, 2, NULL );
+
+		/* Create the gatekeeper task.  This is the only task that is permitted
+		to access standard out. */
+		xTaskCreate(vUARTGatekeeperTask, "Gatekeeper", 240, NULL, 0, NULL );
+
+		/* Start the scheduler so the created tasks start executing. */
+		vTaskStartScheduler();
+	}
+
+    /* If all is well we will never reach here as the scheduler will now be
+    running the tasks.  If we do reach here then it is likely that there was
+    insufficient heap memory available for a resource to be created. */
+	for( ;; );
+	return 0;
 }
 
+ 
+static void prvPrintTask( void *pvParameters )
+{
+int iIndexToString;
 
+	/* Two instances of this task are created so the index to the string the task
+	will send to the gatekeeper task is passed in the task parameter.  Cast this
+	to the required type. */
+	iIndexToString = ( int ) pvParameters;
+
+	for( ;; )
+	{
+		/* print out the string, not directly but by passing the string to the
+		gatekeeper task on the queue.  the queue is created before the scheduler is
+		started so will already exist by the time this task executes.  a block time
+		is not specified as there should always be space in the queue. */
+		xQueueSendToBack(xUARTQueue, &( pcStringsToPrint[ iIndexToString ] ), 0 );
+
+		/* wait a pseudo random time.  note that rand() is not necessarily
+		re-entrant, but in this case it does not really matter as the code does
+		not care what value is returned.  in a more secure application a version
+		of rand() that is known to be re-entrant should be used - or calls to
+		rand() should be protected using a critical section. */
+		//vtaskdelay( ( rand() & 0x1ff ) );
+	}
+}
