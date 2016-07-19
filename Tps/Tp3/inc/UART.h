@@ -29,17 +29,14 @@ You should have received a copy of the GNU General Public License
 #include "FreeRTOSConfig.h"
 #include "task.h"
 #include "queue.h"
+#include "sAPI.h"
 // maximum length
 #define mainMAX_MSG_LEN	( 80 )
 // 
-//void vUARTSenderGatekeeperTask( void *pvParameters );
-//
-//void vUARTReceiverGatekeeperTask( void *pvParameters );
 void vUARTGatekeeperTask( void *pvParameters );
+void vUARTinit(uint32_t);
 /*-----------------------------------------------------------*/
 
-//xQueueHandle xUARTQueueSender;
-//xQueueHandle xUARTQueueReceiver;
 xQueueHandle xUARTQueue;
 
 #endif

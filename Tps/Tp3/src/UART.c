@@ -31,17 +31,30 @@ void vUARTGatekeeperTask( void *pvParameters )
    char *pcMessageToPrint;
    char cBuffer[ mainMAX_MSG_LEN ];
 
-	for( ;; )
-	{
-		/* Wait for a message to arrive. */
-		xQueueReceive(xUARTQueue, &pcMessageToPrint, portMAX_DELAY);
+   //xUARTQueue = xQueueCreate( 5, sizeof( char * ) );
+	/* Check the queue was created successfully. */
+	if(xUARTQueue != NULL)
+   {
+      for( ;; )
+      {
+         /* Wait for a message to arrive. */
+         // xQueueReceive read a item from a queue
+         xQueueReceive(xUARTQueue, &pcMessageToPrint, portMAX_DELAY);
 
-      // funtion for printing(only Gatekeeper task)
-      //vPrintString(pcMessageToPrint);
-		//sprintf( cBuffer, "%s", pcMessageToPrint );
-      vPrintString(pcMessageToPrint);
-		//consoleprint( cBuffer );
+         // funtion for printing(only Gatekeeper task)
+         //vPrintString(pcMessageToPrint);
+         //sprintf( cBuffer, "%s", pcMessageToPrint );
+         vPrintString(pcMessageToPrint);
+         //consoleprint( cBuffer );
 
-	}
+
+      }
+   }
 }
 
+void vUARTinit(uint32_t baudRate)
+{
+   uartConfig(UART_USB, baudRate);
+   // create a Queue for the UART
+   xUARTQueue = xQueueCreate( 5, sizeof( char * ) );
+}

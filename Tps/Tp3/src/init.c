@@ -51,7 +51,7 @@ void initHardware(void)
    digitalConfig( LED2, OUTPUT );
    digitalConfig( LED3, OUTPUT );
    /* Inicializar Uart */
-   uartConfig( UART_USB, 115200 );
+   //uartConfig( UART_USB, 115200 );
 }
 
 
