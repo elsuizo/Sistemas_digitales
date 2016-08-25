@@ -1,0 +1,460 @@
+* Using The FreeRTOS Real Time Kernel, Richard Barry(Resumen)
+** Capitulo 1
+   - Multitasking en sistemas embebidos de tiempo real, tipicamente requieren 
+     un mix de tareas llamadas soft-real-time y hard-real-time
+
+   - En FreeRTOS cada hilo de ejecucion se llama task(tarea)
+   - El FreeRTOS para LPC17xx incluye todas las funcionalidades del standard
+      - Podemos operar en modo *pre-emptive* y en modo *co-operative*
+      - Asignacion de prioridad de tareas flexible
+      - Colas(*Queues*)
+      - Semaforos binarios
+      - Semaforos contadores
+      - Semaforos recursivos
+      - *Mutexes*
+      - Funciones *Tick hook* (No tengo muy claro que es)
+      - Funciones *Idle hook*
+      - Chequeo de *Stackoverflow*
+      - macros *Trace hook* (no se que es)
+   - Tambien maneja interrupciones anidadas
+   - Task Functions(funciones de tareas)
+     Las tareas son implementadas como funciones de C, lo unico que es 
+     especial de ellas es su prototipo de funcion:
+     `void ATaskFunction(void *pvParemeters)`
+     Cada tarea es un programa en si mismo, con la particularidad de que cada 
+     una de ellas posee un loop infinito. Ellas como se ve en el prototipo no 
+     poseen un valor de retorno. La definicion de una tarea puede usarse para 
+     crear cualquier numero de tareas(cada una tendra una instancia de 
+     ejecucion diferente, con sus propio stack y su propio copia de cualquier 
+     variable automatica definidas en la propia tarea)
+   - Creando una tarea
+     la funcion de la API para esto es:
+     `xTaskCreate()`
+   - Task Priorities
+     el parametro de la funcion `xTaskCreate()` `uxPriority` asigna una 
+     prioridad inicial a la tarea que fue creada. Esta prioridad puede ser 
+     cambiada luego en cualquier momento con la funcion de la api
+     `vTaskPrioritySet()`
+      - El numero maximo de prioridades disponibles es seteado por: 
+        `configMAX_PRIORITIES`(FreeRTOSConfig.h)
+   - Para poder seleccionar la proxima tarea a correr el despachador de 
+     tareas debe realizar una interrupcion periodica de periodo 
+     `configTICK_RATE_HZ`, por ejemplo si la constante anterior se setea a 
+     100Hz entonces la ventana de tiempo para cada tarea sera de 10 ms
+*** Expandiendo el estado NOT RUNNING
+    Para hacer que nuestras tareas sean utiles, necesitamos una manera de 
+    hacerlas que sean ejecutadas por algun evento. Como sabemos el scheduller siempre 
+    selecciona la tarea de mas alta prioridad que esta preparada para ser 
+    ejecutada. Entonces usando tareas disparadas por eventos estas pueden ser 
+    creadas 
+*** El estado bloqueado
+    Una tarea que esta esperando un evento se dice que esta en el estado 
+    bloqueado(*Blocked*), el cual es un subestado del *Not Running*. Las 
+    tareas pueden entrar a este estado bloqueado esperando dos tipos 
+    diferentes de eventos:
+      1. Eventos temporales(ralativo al tiempo), siendo o un *delay* de tiempo 
+         que ha transcurrido o un tiempo absoluto que se ha alcanzado. Por 
+         ejemplo una tarea puede entrar en el estado bloqueado para esperar 
+         10 ms para pasar
+      2. Eventos de sincronizacion(donde el evento se origina desde otra 
+         tarea o interrupcion). Por ejemplo una tarea puede entrar en el 
+         estado bloqueado para esperar por datos que arriban a una cola.
+*** El estado suspendido(*Suspended*)
+    Este estado es tambien un sub-estado de *Not running*. Tareas en este 
+    estado no estan disponible para el scheduler. La unica manera de caer en 
+    este estado es con la llamada a la funcion `vTaskSuspend()` y la unica 
+    manera de volver a ser llamada es con la llamada de la funcion 
+    `vTaskResume()` o `vTaskResumeFromISR()`. La mayoria de las aplicaciones 
+    no usan el estado *Suspended*. 
+*** El estado Listo(*Ready*)
+    Las tareas que no estan ni en el estado *Not Running* o *Blocked* o 
+    *Suspended* se dice que estan en el estado *Ready*. Ellas estan listas 
+      para ser ejecutadas, pero que no estan en el momento en el estado 
+      *Running*
+     Luego viene el diagrama de los estados:
+
+*** Ejemplo usando el estado *Blocked* para generar un delay
+    Como vimos en los ejemplos anteriores, la realizacion de un delay se 
+    hacia con un loop de una cantidad fija de iteraciones(conocido como 
+    pooling) esta metodologia es altamente ineficiente ya que la tarea 
+    durante este pollong no realiza ninguna operacion y mantiene "atrapado" 
+    al cpu en ese estado. Por ello se reemplaza a este loop por el llamado a 
+    la funcion de la API `vTaskDelay()`(la cual debe ser habilitada en el 
+    archivo de configuracion `FreeRTOS_Config.h`). Esta funcion pone a la 
+    tarea que la llama en el estado *Blocked* por un numero fijo de 
+    ticks(interrupciones), mientras la tarea esta en este estado no consume 
+    ningun tiempo de procesamiento ya que el tiempo de procesamiento es 
+    consumido solo cuando hay trabajo para realizar.
+*** `vTaskDelayUntil()` funcion de la API
+    Esta funcion debe ser utilizada cuando un periodo de ejecucion fijo es 
+    requerido(cuando queremos que nuestra tarea se ejecute periodicamente con 
+    una frecuencia fija dada). Tambien debe ser habilitada desde el archivo 
+    de configuracion `FreeRTOS_Config.h` 
+*** Ejemplo combinando las tareas *blocking* y *non-blocking*
+    los ejemplos 4 y 5 muestran como funcionan las tareas bloqueantes y las 
+    tareas de polling por separado. En el ejemplo 6 se muestra una secuencia 
+    de combinaciones de estos tipos de tareas combinadas.
+    Este ejemplo(ejemplo 6) tiene dos pasos importantes:
+    1. Dos tareas son creadas con prioridad 1. Estas lo unico que hacen es 
+       imprimir continuamente un mensaje(string)
+       Estas tareas nunca llaman a alguna funcion de la API, por ello 
+       permanecen en el estdo Ready o en Running. Tareas de este tipo son 
+       llamadas tareas *de procesamiento continuo* y ellas siempre tienen 
+       trabajo por hacer 
+    2. Una tercer tarea es creada con prioridad 2; esto es por encima de las 
+       otras dos tareas. La tercer tarea tambien solo imprime un mensaje, 
+       pero esta vez es periodico. Para ello utiliza la funcion de la API que 
+       vimos `vTaskDelayUntil()` para autodigir su estado al *Blocked* entre 
+       cada iteracion.
+*** La tarea Idle y el Idle task Hook
+    Las tareas del ejemplo 4 estan casi siempre en el estado *Blocked*. El 
+    procesador siempre necesita algo para hacer(ejecutar) por ello al menos 
+    una tarea debe estar en el estado *Running*. Para asegurar eso el 
+    scheduler crea automaticamente la tarea Idle que posee como 
+    caracteristica una prioridad 0(la mas baja prioridad posible). 
+**** La Funcion del Idle task Hook(funcion de enlace de tareas)
+     Es posible agregar una funcionalidad especifica directamente en la 
+     tarea del Idle utilizando estas funciones de enlaces de tareas, que son 
+     funciones que son llamadas automaticamente por la tarea Idle una vez por 
+     iteracion en el loop principal de la tarea Idle. Usos comunes de las 
+     funciones de enlaces de tareas incluyen:
+     - Ejecutar procesos de baja prioridad, de background o procesos 
+       continuos
+     - Medir la cantidad de repuesto que posee para procesamiento(ya que Idle 
+       corre cuando ninguna de las otras no estan corriendo, asi que 
+       midiendo el tiempo de procesamiento de Idle provee una idea del tiempo 
+       de procesamiento que nos queda disponible)
+     - Colocando el procesador en un modo de bajo consumo, provee un metodo 
+       automatico para salvar energia cuando no hay ninguna aplicacion para 
+       ejecutar.
+**** Limitaciones en el uso de las funciones de enlace de tareas(Idle Task)
+     Estas funciones deben satisfacer las siguientes reglas:
+      1. Una funcion de enlace de tareas no debe nunca intentar bloquear o 
+         suspender. Estas funciones deben ejecutarse cuando no haya otras 
+         tareas(comunes) para ejecutarse.
+      2. Si la aplicacion hace uso de la funcion de la API `vTaskDelete()` 
+         entonces las funciones de enlace de tareas debe siempre retornar a 
+         la funcion de la que fue llamada dentro de un tiempo finito. Esto es 
+         porque la funciones de enlaces de tareas son las responsables de 
+         realizar la limpieza del kernel(recursos de memoria) luego de que 
+         una tarea es borrada, por ello si la funcion de enlace de tareas 
+         permanece siempre en este estado esta limpieza no podra realizarse.
+*** Cambiando las prioridades de las tareas
+    La funcion del API que realiza esto es: `vTaskPrioritySet()` puede 
+    usarse para cambiar la prioridad de cualquier tarea despues de que el 
+    scheduler ha comenzado. Nuevamente esta funcion debe ser incluida desde 
+    el archivo de configuracion: `FreeRTOSConfig.h`, poniendo el flag 
+    `INCLUDE_vTaskPrioritySet` en 1
+
+
+**** Ejemplo 8. Cambiando las prioridades de una tarea
+     El scheduler debe siempre seleccionar la tarea que este en el estado 
+     *Ready* y poseea la mas alta prioridad. La funcion de la API 
+       Ver los ejemplos y como funcionan, tambien hay ejemplos de delete, 
+
+** Capitulo 2 Manejo de Colas(Queues)
+   Las colas son el mecanismo por el cual FreeRTOS utiliza para comunicar y 
+   sincronizar tareas.
+
+
+*** Caracteristicas de una Cola
+    - Almacenamiento de datos
+      Una cola puede almacenar un numero finito de de datos, los cuales se 
+      organizan por elementos dentro de ella, que a su vez tienen una 
+      longitud. El maximo numero de elementos que una lista puede almacenar 
+      se le llama largo(length). Ambos el largo y el tamanio de cada elemento 
+      de la lista son "seteados" cuando se crea la cola. Normalmente son 
+      usadas como colas FIFO(First Input First Output), donde los datos son 
+      escritos en el final de la cola y los datos son removidos desde el 
+      frente de la misma(No es al reves???).
+    - Accediendo a los datos de una cola
+      Las Queues son objetos que no tienen ningun duenio y que tampoco son 
+      asociadas a ninguna tarea en particular. Cualquier numero de tareas 
+      puede escribir a la misma queue y cualquier numero de tareas puede leer  
+      de la misma queue. Una queue con multiples escritores es muy comun, no 
+      asi una queue con multiples lectores(en raras ocaciones )
+    - Bloqueando sobre la lectura de una queue
+      Cuando una tarea intenta leer de una queue puede opcionalmente 
+      especificarse un tiempo de bloqueo. Esto es el tiempo que la tarea 
+      deberia esperar en el estado *Blocked* a que los datos esten listos. 
+      Una tarea que esta en el estado *Blocked* esperando por los datos de 
+      una queue, es automaticamente movida al estado *Ready* cuando alguna 
+      otra tarea o una interrupcion pone datos en esta queue. La tarea 
+      tanbien se mueve automaticamente al estado *Ready* si el tiempo de 
+      espera expira antes que los datos son habilitados
+      Queues pueden tener multiples lectores de datos entonces es posible 
+      para una simple queue tener mas de una tarea bloqueada esperando los 
+      datos. Cuando es este el caso solo una tarea que es desbloqueada(que es 
+      la que tiene la mas alta prioridad) y si las tareas tienen el mismo 
+      nivel de prioridad entonces la tarea que ha estado mas tiempo esperando 
+      sera la que se desbloqueara.
+    - Bloqueando sobre la escritura de una queue
+      Como para la lectura de una queue, una tarea puede especificar un 
+      bloque de tiempo de bloqueo cuando esta escribiendo una queu. En este 
+      caso el tiempo de bloqueo es el tiempo maximo que puede ser retenida en 
+      el estado *Bloocked* esperando un espacio en la queue. Queues pueden 
+      tener multiples escritores. Vale lo mismo que para el caso de la 
+      lectura
+    - Usando una Queue
+      La funcion de la API `xQueueCreate()` se usa para crear una queue, la 
+      cual debe ser creada explicitamente antes de ser usada. 
+    - Ejemplo 10 Bloqueando cuando se recibe datos de una queue
+      Este ejemplo muestra como crear una queue, datos son enviados desde una 
+      queue hacia multiples tareas y los datos son recibidos por la queue.
+      La prioridad de las tareas que envian a la queue es menor que la 
+      prioridad de las tareas que reciben los datos de la queue. Esto quiere 
+      decir que la queue no deberia nunca contener mas de un item, ya que ni 
+      bien los datos son enviados a la queue la tarea que recibe es 
+      desbloqueada, se prepara a la tarea que va a enviar y se remueven los 
+      datos dejando la queue vacia otra vez.
+    - Ejemplo 11 Bloqueando cuando se envia a una queue o cuando se envia una 
+      estructura de datos a la queue.
+      Este ejemplo es similar al ejemplo 10, pero las prioridades de las 
+      tareas son invertidas, entonces las tareas que reciben los datos tienen 
+      una prioridad menor que las que envian los datos. Tambien la queue es 
+      usada para enviar estructuras de datos, en lugar de simples enteros 
+      como se hacia antes en el ejemplo 10.
+    - Faltan ejemplos 11 y ...
+    - Trabajando con gran cantidad de datos
+      Si el tamanio de los datos a ser guardada en la queue es grande, 
+      entonces es preferible usar la queue para transferir punteros a los 
+      datos, en lugar de las copias de los datos mismos byte a byte(como 
+      veniamos haciendo en los ejemplos anteriores). Transmitir punteros es 
+      mas eficiente en ambos sentidos en el tiempo de procesamiento y en la 
+      cantidad de memoria RAM utilizada para crear la queue. Sin embargo 
+      cuando tratamos con punteros debemos tener cuidado en las siguientes 
+      cosas:
+      1. El duenio de la RAM a la que estamos apuntando debe estar claramente 
+         definido
+         Cuando compartimos memoria entre tareas via punteros debemos 
+         asegurarnos que ambas tareas no modifiquen el contenido de la memoria 
+         simultaneamente. Idealmente solo la tarea que envia debe estar 
+         permitida a acceder a la memoria mientras se encuentra en la queue, 
+         y solo la tarea que recibe los datos debe estar permitida que acceda 
+         a la memoria despues que el puntero fue recibido desde la queue.
+      2. La RAM apuntada debe ser valida
+         Si la memoria a apuntar fue allocada dinamicamente, entonces 
+         exactamente una tarea tiene la responsabilidad por liberar la 
+         memoria. Ninguna tarea deberia intentar acceder a la memoria despues 
+         de que fue liberada.
+         Un puntero nunca debe usarse para acceder a datos que fueron 
+         allocados sobre el stack de una tarea(Ver no se muy bien que quiere 
+         decir)
+** Capitulo 3 Manejo de interrupciones
+   Eventos: La mejores estrategias para procesar eventos se basan en las 
+   siguientes presunciones:
+   1. Como deberiamos detectar el evento? Las interrupciones son normalmente 
+      usadas, pero tambien se puede utilizar un esquema de polling(encuesta)
+   2. Cuando las interrupciones son usadas cuanto procesamiento debe 
+      realizarse dentro de la ISR(Interrup Service Routine), y cuanto afuera 
+      de ella? Es normalmente deseable que las ISR sean lo mas cortas 
+      posibles
+   3. Como los eventos seran comunicados con el main(no ISR), y como puede 
+      estructurarse este codigo para acomodar de la mejor manera posible las 
+      potenciales ocurrencias asincronicas
+
+  FreeRTOS no impone ninguna de las tres formas explicitamente, pero si 
+      provee herramientas para poder implementarlas. Notemos que las 
+      funciones de la API y los macros que terminan con `FromISR` o 
+      `FROM_ISR` deben ser utilizadas dentro de una ISR.
+*** Procesamiento de interrupciones en diferido(o algun otro sinonimo...)
+
+**** Semaforos binarios usados para sincronizacion
+     Un semaforo binario puede utilizarse para desbloquear a una tarea en 
+     cada tiempo particular en la cual una interrupcion ocurre, efectivamente 
+     sincronizando las tareas con las interrupciones. Esto permite que las 
+     mayoria de los pocesamientos asociados a un evento sean implementados 
+     dentro de una tarea sincronizada, con una porcion remanente muy pequenia 
+     y rapida directamente en la ISR. El procesamiento de la interrupcion se 
+     dice que fue diferida a un manejador de tareas.
+     Si el procesamiento de la interrupcion es critico en el tiempo, entonces 
+     la prioridad de la tarea asociada al handler(manejador) puede 
+     setearse para asegurar que siempre se prepare las otras tareas en el 
+     sistema. La ISR puede entonces ser implementada para incluir un "switch" 
+     de contexto para asegurar que la ISR retorna directamente a la tarea 
+     handler cuando la ISR ha completado su ejecucion. Esto tiene el efecto 
+     de asegurar que todos los eventos sean procesados continuamente en el 
+     tiempo(que no haya baches temporales, mirar el grafico pag 104)Como si 
+     hubiesen sido implementados todos dentro del ISR
+     La tarea de handler usa una llamada bloqueante "take" al semaforo como 
+     una medida de entrada al estado *Blocked* para esperar que el evento 
+     suceda. Cuando el evento sucede, la ISR usa una operacion "give" sobre 
+     el mismo semaforo para desbloquear la tarea entonces el evento requerido 
+     puede ser procesado. Las acciones de "take" y de "give" tienen distintas 
+     interpretaciones dependiendo en el contexto en el que son aplicados. En 
+     la terminologia clasica de los semaforos "taking a semaphore" es 
+     equivalente a P() y "given a semaphore" es equivalente a V(). En este 
+     scenario de sincronizacion con interrupciones podemos pensar que un 
+     semaforo binario es una queue con length=1, o sea que la queue solo 
+     puede tener como maximo un item en cualquier momento, entonces esta 
+     siempre o full o vacia(de alli su nombre binario)
+**** La funcion de la API vSemaphoreCreateBinary()
+     Los manejadores de todos los tipos de semaforos de FreeRTOS son 
+     guardados en una variable del tipo `xSemaphoreHandle`. Antes de que un 
+     semaforo pueda ser usado debe ser creado, para ello usamos la funcion de 
+     la API `vSemaphoreCreateBinary()`
+**** La funcion de la API xSemaphoreTake()
+     `Taking` un semaforo quiere decir "obtener" o "recibir" un semaforo. El 
+     semaforo puede ser "tomado" solo si esta disponible. En la terminologia 
+     clasica de semaforos se `xSemaphoreTake()` es equivalente a la operacion 
+     P()(Nota: Estaria bueno ver algo de la teria clasica de semaforos y 
+     sistemas opertivos)
+     Todos los tipos de semaforos de FreeRTOS, exepto los semaforos 
+     recursivos pueden ser "tomados" usando la funcion `xSemaphoreTake()`
+     *Esta funcion no debe ser utilizada desde una ISR!!!*
+**** La funcion de la API xSemaphoreGiveFromISR()
+     Todos los tipos de semaforos de FreeRTOS, exepto los semaforos 
+     recursivos, pueden ser "tomados" usando la funcion 
+     `xSemaphoreGiveFromISR()` esta es una funcion especial de 
+     `xSemaphoreGive()` que es usada especificamente dentro de una ISR
+**** Ejemplo 12
+     *Usando un semaforo binario para sincronizar una tarea con una interrupcion*
+     [[Libros/FreeRTOS_examples/Example12/main.c][ejemplo12]]
+     Este ejemplo usa un semaforo binario para desbloquear una tarea desde 
+       una ISR y efectivamente sincronizar la tarea con la interrupcion. Una 
+       simple tarea periodica es usada para generar una interrupcion cada 500 
+       ms. En este caso una interrupcion generada por software es usada 
+       porque esta permite que el tiempo al que la interrupcion ocurre sea 
+       controlado, que a su vez permite que la secuencia de ejecucion sea 
+       observada mas facilmente
+
+**** Semaforos contadores
+     El ejemplo qw demuestra como se pueden usar un semaforo binario para 
+     sincronizar una tarea con una interrupcion. La secuencia de ejecucion es 
+     como sigue:
+     1. Ocurre una interrupcion
+     2. La rutina de interrupcion(ISR) ejecuta el "giving" al semaforo para 
+        desbloquear la tarea manejadora
+     3. La tarea manejadora se ejecuta tan pronto como la interrupcion ha 
+        terminado. La primera cosa que hace es "take" del semaforo
+     4. La tarea manejadora procesa el evento antes de intentar tomar el
+        semaforo de vuelta, entrando en el estado *Blocked* si el samaforo no 
+        esta immediatamente disponible
+     Esta secuencia es perfectamente adecuada si la interrupcion puede 
+        ocurrir a una frecuencia relativamente baja. Si otra interrupcion 
+        ocurre antes que la tarea manejadora ha completado su procesamiento 
+        de la primer tarea de interrupcion, entonces el semaforo binario 
+        cerrara efectivamente el evento, permitiendo a la tarea manejadora 
+        procesar el nuevo evento inmediatamente despues de que ha terminado 
+        de procesar el evento original. Por ello un seaforo binario solo 
+        puede cerrar un evento de interrupcion a la vez, cualquier evento 
+        subsecuente que ocurrio despues del evento cerrado siendo procesado 
+        se perdera. Este escenario puede evitar usando un semaforo contador 
+        en lugar de uno binario. Asi como un semaforo binario puede pensarse 
+        como un queue de length = 1, los semaforos contadores se pueden 
+        pensar como queues de length > 1. Las tareas no se preocupan por los 
+        datos que son guardados en las queues solo cuando la queue esta vacia 
+        o no. Cada vez que un semaforo contador es "given", otro espacio de 
+        su propia queue es usado. El numero de elementos que hay en una queue 
+        esta en guardado en el valor 'count' del semaforo.
+        La variable `configUSE_COUNTING_SEMAPHORES` debe estar en 1 en el 
+        archivo `FreeRTOSConfig.h` para tener a los semaforos contadores 
+        habilitados.
+      Los semaforos contadores son usados tipicamente para dos cosas:
+      1. Contar eventos:
+         En este escenario un manejador de eventos dara un "give" al semaforo 
+         cada vez que suceda un evento causando que el contador del semaforo 
+         se incremente en cada "give". Una tarea manejadora(que mal que 
+         suena) que "take" un semaforo cada vez que procese un 
+         evento(causando que el contador del semaforo sea decrementado en 
+         cada "take"). El valor del contador es la diferencia entre el numero 
+         de eventos que ha ocurrido y el numero que han sido procesados. Esto 
+         esta mostrado en la fig. 36. Estos semaforos que son usados para 
+         contar eventos son creados con el valor del contador en cero.
+      2. Manejo de recursos:
+         En este escenario, el contador indica el numero de recursos 
+         disponibles. Para obtener el control de un recurso una tarea debe 
+         primero obtener un semaforo(decrementando el valor del contador). 
+         Cuando el valor alcanza el cero, entonces no hay recursos libres. 
+         Cuando una tarea termina de usar un recurso, esta "give" el semaforo 
+         de vuelta(incrementando el contador). Semaforos contadores que son 
+         usados para manejar recursos son creados con el valor del contador 
+         igual al numero de recursos que tenemos disponibles. Capitulo 4 
+         cubre el uso de semaforos para manejar recursos.
+***** La funcion de la API `xSemaphoreCreateCouting()`
+      un "handles" para todos los types de semaforos que existen en FreeRTOS 
+      son guardados en una variable del tipo `xSemaphoreHandle`
+      Antes de que un semaforo pueda ser usado, este debe ser creado. Para 
+      crear un semaforo contador hay que utilizar la siguiente funcion:
+      `xSemaphoreCreateCouting()`
+
+***** Ejemplo 13
+      Usando un semaforo contador para sincronizar una tarea con una 
+      interrupcion
+
+     [[Libros/FreeRTOS_examples/Example13/main.c][ejemplo13]]
+
+      Este ejemplo es una mejora del ejemplo 12 usa un semaforo contador en 
+      lugar del semaforo binario. `main()` es cambiada para incluir una 
+      llamada a `xSemaphoreCreateCouting()` en lugar de 
+      `vSemaphoreCreateBinary()`
+
+***** Usando queues dentro de una ISR(Interrupt Service Routine)
+      `xQueueSendToFrontFromISR()`, `xQueueSendToBackFromISR()` y 
+      `xQueueReceiveFromISR()` son versiones de `xQueueSendToFront()`, 
+      `xQueueSendToBack()` y `xQueueReceive()` respectivamente, que son 
+      seguras de usar dentro de una ISR. 
+      Los semaforos son usados para comunicar eventos. Queues son usadas para 
+      comunicar eventos y transferir datos.
+
+***** Uso eficiente de las Queues
+      La mayoria de los ejemplos de FreeRTOS que se pueden bajar incluyen un 
+      ejemplo de "driver" para la UART que usa queues para pasar caracteres  
+      a un manejador de interrupciones para la transmision. Todo caracter que 
+      es transmitido o recibido es pasado individualmente a traves de la 
+      queue. Los "driver" implementados de esta manera son una manera de 
+      demostrar el uso de queues y interrupciones. Pero debemos notar que 
+      pasar caracteres individualmente a traves de una queue es 
+      extremadamente ineficiente(especialmente a frecuencias de transmision 
+      altas) y NO es recomendado para codigo que va a ser de produccion. 
+      Tecnicas mas eficientes incluyen:
+      - Poner cada caracter recibido en un simple buffer en RAM, entonces 
+        usar un semaforo para desbloquear una tarea para procesar el buffer, 
+        luego de recibir un mensaje de recepcion, o cuando se ha detectado un 
+        corte en la transmision.
+      - Interpretar los caracteres recibidos directamente dentro de la ISR, 
+        entonces usar una queue para enviar los comandos interpretados y 
+        decodificados a la tarea para que sean procesados(en una manera 
+        similar a la fig. 28). Esta tecnica es adecuada si y solo si la 
+        intrepretacion de los datos del stream es lo suficientemente rapida 
+        para realizarse dentro de una interrupcion.
+** Capitulo 4
+
+*** Manejo de Recursos
+
+*** Gatekeeper Tasks
+    
+    Se le llama Gatekeeper a las tareas que son las unicas duenias de un 
+    recurso. Solo esta tarea tiene permitido el acceso al recurso 
+    directamente(cualquier otra tarea que requiera el uso del recurso puede 
+    hacerlo solo de manera indirecta a traves del uso del Gatekeeper)
+*** Ejemplo 16
+
+     [[Libros/FreeRTOS_examples/Example16/main.c][ejemplo16]]
+    Este ejemplo provee una implementacion alternativa para vPrintString(). 
+    Esta vez una tarea Gatekeeper(portero) es usada para manejar el acceso a 
+    las salidas standard. Cuando una tarea quiere escribir un mensaje a la 
+    terminal esta no llama a la funcion print directamente pero en cambio 
+    envia un mensaje al Gatekeeper. La tarea Gatekeeper pasa la mayor parte 
+    de su tiempo en el estado Bloqueado, esperando mensajes que arriben a la 
+    Queue. Cuando un mensaje arriba, el Gatekeeper escribe el mensaje de 
+    salida, antes de volver al estado Blocked para esperar el nuevo mensaje.
+    Las interrupciones pueden ser enviadas a las queues, entonces una ISR 
+    puede usarse tranquilamente a la Gatekeeper para escribir mensajes en la 
+    terminal. En este ejemplo una funcion tick hook es usada para escribr un 
+    mensaje cada 200 ticks.
+    Una tick hook(o tick callback) es una funcion que es llamada por el 
+    kernel durante cada interrupcion de tick(una famosa funcion periodica???)
+    Para usar una funcion de tick:
+    1. Hay que setear `USE_TICK_HOOK` a 1 en el archivo `FreeRTOSConfig.h`
+    2. Proveer la implementacion de la funcion hook, usando la misma 
+       funcion(con el mismo nombre)
+       `void vApplicationTickHook(void);`
+       Estas funciones se ejecutan dentro del contexto de una interrupcion 
+       por tick y deben mantenerse muy chicas(en tamanio), deben usar solo un 
+       API de FreeRTOS cuyo nombre no termine con `FromISR()`
+       moderado espacio del stack y no deben llamar a ninguna funcion de la 
+
+      
+** Capitulo 5
+
